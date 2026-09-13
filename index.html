@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>श्री लक्ष्मी हिसाब-किताब</title>
+    <title>श्री लक्ष्मी कुबेर - सुपर एडवांस हिसाब-किताब</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js for Visual Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
         
         body {
-            background: #090d16;
+            background: #070a12;
             font-family: 'Poppins', sans-serif;
             color: #f1f5f9;
         }
@@ -21,7 +26,7 @@
             background: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 215, 0, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.2);
         }
 
         .gold-gradient-text {
@@ -31,162 +36,245 @@
         }
 
         .gold-border-glow {
-            box-shadow: 0 0 25px rgba(245, 158, 11, 0.2);
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.15);
         }
 
-        /* Splash Animation */
         @keyframes pulseGlow {
             0%, 100% { transform: scale(1); opacity: 0.9; }
-            50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 35px rgba(234, 179, 8, 0.8)); }
+            50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 35px rgba(245, 158, 11, 0.8)); }
         }
 
         .laxmi-glow {
             animation: pulseGlow 2.5s infinite ease-in-out;
         }
+
+        .quick-chip {
+            transition: all 0.2s ease;
+        }
+        .quick-chip:active {
+            transform: scale(0.92);
+        }
     </style>
 </head>
-<body class="min-h-screen pb-12 flex flex-col items-center justify-start p-4 select-none">
+<body class="min-h-screen pb-16 flex flex-col items-center justify-start p-3 select-none">
 
     <!-- 1. LAXMI MATA SPLASH SCREEN -->
     <div id="splashScreen" onclick="closeSplash()" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700 cursor-pointer">
         <div class="relative flex flex-col items-center">
-            <!-- Laxmi Mata SVG Graphic Aura -->
-            <div class="w-44 h-44 rounded-full bg-gradient-to-tr from-amber-600 via-yellow-400 to-amber-200 p-1 laxmi-glow shadow-2xl shadow-amber-500/40 flex items-center justify-center">
+            <div class="w-48 h-48 rounded-full bg-gradient-to-tr from-amber-600 via-yellow-400 to-amber-200 p-1 laxmi-glow shadow-2xl shadow-amber-500/40 flex items-center justify-center">
                 <div class="w-full h-full bg-slate-950 rounded-full flex flex-col items-center justify-center p-4 text-amber-400">
                     <span class="text-6xl">🪔</span>
-                    <span class="text-xs font-bold tracking-widest text-amber-300 mt-2">|| श्री लक्ष्मी प्रसन्न ||</span>
+                    <span class="text-xs font-extrabold tracking-widest text-amber-300 mt-2">|| श्री लक्ष्मी प्रसन्न ||</span>
                 </div>
             </div>
             
             <h1 class="text-3xl font-extrabold gold-gradient-text mt-6 tracking-wide">
-                शुभ लाभ हिसाब-किताब
+                लक्ष्मी कुबेर हिसाब
             </h1>
-            <p class="text-amber-200/80 text-xs mt-2 font-medium">बरकत और संपूर्ण बचत का डिजिटल बहीखाता</p>
+            <p class="text-amber-200/80 text-xs mt-2 font-medium">100% सुरक्षित • आपका पर्सनल एस्थेटिक वॉलेट</p>
             
-            <div class="mt-8 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs animate-bounce">
-                आगे बढ़ने के लिए कहीं भी टच करें ⚡
+            <div class="mt-8 px-5 py-2.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs animate-bounce font-semibold flex items-center gap-2">
+                ⚡ टच करके ऐप खोलें
             </div>
         </div>
     </div>
 
     <!-- MAIN APP CONTAINER -->
-    <div id="mainApp" class="w-full max-w-md space-y-5 mt-2 hidden">
+    <div id="mainApp" class="w-full max-w-md space-y-4 mt-1 hidden">
 
         <!-- HEADER -->
-        <header class="flex justify-between items-center px-2">
+        <header class="flex justify-between items-center px-2 py-1">
             <div>
-                <h1 class="text-xl font-bold gold-gradient-text flex items-center gap-2">
-                    🪔 श्री लक्ष्मी कृपा
+                <h1 class="text-xl font-extrabold gold-gradient-text flex items-center gap-2">
+                    🪔 श्री लक्ष्मी हिसाब
                 </h1>
-                <p class="text-[11px] text-slate-400">पर्सनल एस्थेटिक वॉलेट</p>
+                <p class="text-[10px] text-slate-400">बिना किसी थर्ड-पार्टी अकाउंट के 100% प्राइवेट</p>
             </div>
-            <button onclick="editIncome()" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-300 px-3 py-1.5 rounded-full border border-amber-500/30 transition flex items-center gap-1">
-                <i data-lucide="edit-3" class="w-3 h-3"></i> इनकम बदलें
-            </button>
+            <div class="flex items-center gap-2">
+                <button onclick="togglePrivacy()" title="बैलेंस छुपाएं/दिखाएं" class="p-2 bg-slate-900 rounded-xl border border-slate-800 text-amber-400 hover:bg-slate-800 transition">
+                    <i id="eyeIcon" data-lucide="eye" class="w-4 h-4"></i>
+                </button>
+                <button onclick="editIncome()" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-300 px-3 py-2 rounded-xl border border-amber-500/30 transition flex items-center gap-1 font-semibold">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> आय बदलें
+                </button>
+            </div>
         </header>
 
         <!-- TOP BALANCE & INCOME CARD -->
-        <div class="glass-card gold-border-glow rounded-3xl p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/30">
-            <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+        <div class="glass-card gold-border-glow rounded-3xl p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40">
+            <div class="absolute -right-8 -bottom-8 w-36 h-36 bg-amber-500/10 rounded-full blur-3xl"></div>
             
-            <div class="grid grid-cols-2 gap-4 divide-x divide-slate-800">
+            <div class="grid grid-cols-2 gap-3 divide-x divide-slate-800/80">
                 <!-- Total Income -->
                 <div class="pr-2">
-                    <span class="text-xs text-slate-400 font-medium block mb-1">कुल मासिक आय</span>
-                    <div class="text-xl font-bold text-slate-200" id="displayIncome">₹9,000</div>
+                    <span class="text-[11px] text-slate-400 font-medium block">कुल मासिक आय</span>
+                    <div class="text-lg font-bold text-slate-200" id="displayIncome">₹9,000</div>
                 </div>
                 <!-- Total Spent -->
-                <div class="pl-4">
-                    <span class="text-xs text-slate-400 font-medium block mb-1">कुल खर्च</span>
-                    <div class="text-xl font-bold text-rose-400" id="displaySpent">₹0</div>
+                <div class="pl-3">
+                    <span class="text-[11px] text-slate-400 font-medium block">कुल खर्च</span>
+                    <div class="text-lg font-bold text-rose-400" id="displaySpent">₹0</div>
                 </div>
             </div>
 
-            <hr class="border-slate-800 my-4">
+            <hr class="border-slate-800 my-3">
 
             <!-- Remaining Balance -->
             <div class="flex justify-between items-end">
                 <div>
-                    <span class="text-xs text-amber-400/90 font-semibold uppercase tracking-wider block">बचा हुआ बैलेंस (Remaining)</span>
-                    <div class="text-3xl font-extrabold text-emerald-400 mt-0.5" id="displayRemaining">₹9,000</div>
+                    <span class="text-[10px] text-amber-400/90 font-semibold uppercase tracking-wider block">बचा हुआ बैलेंस (Balance)</span>
+                    <div class="text-3xl font-extrabold text-emerald-400 mt-0.5 tracking-tight" id="displayRemaining">₹9,000</div>
                 </div>
-                <div class="bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full text-[10px] font-bold text-emerald-300">
+                <div id="budgetStatusTag" class="bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full text-[10px] font-bold text-emerald-300">
                     सुरक्षित बजट
                 </div>
+            </div>
+
+            <!-- DAILY BUDGET BAROMETER -->
+            <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-[11px]">
+                <span class="text-slate-400 flex items-center gap-1">
+                    <i data-lucide="zap" class="w-3 h-3 text-amber-400"></i> आज की सेफ़ लिमिट:
+                </span>
+                <span id="dailyLimitText" class="font-bold text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-800/40">₹300 / दिन</span>
+            </div>
+        </div>
+
+        <!-- QUICK 1-TAP CHIPS -->
+        <div class="space-y-1.5">
+            <span class="text-[11px] text-slate-400 font-semibold px-1">⚡ 1-टैप क्विक खर्चे:</span>
+            <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <button onclick="quickAdd('चाय-नाश्ता', 20, '🍔 खाना', 'Cash')" class="quick-chip bg-slate-900 border border-amber-500/30 text-amber-200 text-xs px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-amber-500/20">☕ ₹20 चाय</button>
+                <button onclick="quickAdd('नाश्ता', 50, '🍔 खाना', 'UPI')" class="quick-chip bg-slate-900 border border-amber-500/30 text-amber-200 text-xs px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-amber-500/20">🍔 ₹50 नाश्ता</button>
+                <button onclick="quickAdd('पेट्रोल', 100, '🚌 यात्रा', 'UPI')" class="quick-chip bg-slate-900 border border-amber-500/30 text-amber-200 text-xs px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-amber-500/20">⛽ ₹100 पेट्रोल</button>
+                <button onclick="quickAdd('मोबाइल रीचार्ज', 299, '📱 रीचार्ज', 'UPI')" class="quick-chip bg-slate-900 border border-amber-500/30 text-amber-200 text-xs px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-amber-500/20">📱 ₹299 रीचार्ज</button>
             </div>
         </div>
 
         <!-- ADD EXPENSE FORM -->
-        <form id="expenseForm" class="glass-card rounded-3xl p-5 space-y-4 border border-slate-800">
-            <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2">
-                <i data-lucide="plus-circle" class="w-4 h-4 text-amber-400"></i> नया खर्चा दर्ज करें
-            </h2>
+        <form id="expenseForm" class="glass-card rounded-3xl p-4 space-y-3.5 border border-slate-800">
+            <div class="flex justify-between items-center">
+                <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-4 h-4 text-amber-400"></i> नया खर्चा जोड़ें
+                </h2>
+                <label class="flex items-center gap-1.5 text-xs text-amber-300 cursor-pointer bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
+                    <input type="checkbox" id="isUdhaar" class="accent-amber-500 rounded">
+                    <span>🤝 उधार है?</span>
+                </label>
+            </div>
 
-            <!-- Amount Input -->
+            <!-- Amount Input & Impulse Warning -->
             <div>
-                <label class="text-xs text-slate-400 block mb-1">रकम (Amount ₹)</label>
+                <label class="text-[11px] text-slate-400 block mb-1">रकम (Amount ₹)</label>
                 <div class="relative">
-                    <span class="absolute left-4 top-3 text-amber-400 font-bold">₹</span>
-                    <input type="number" id="amount" required placeholder="50" 
-                        class="w-full bg-slate-950/80 border border-slate-800 rounded-2xl py-3 pl-9 pr-4 text-white font-bold text-lg focus:outline-none focus:border-amber-500 transition">
+                    <span class="absolute left-4 top-2.5 text-amber-400 font-bold">₹</span>
+                    <input type="number" id="amount" required placeholder="50" oninput="calculateImpulseWarning()"
+                        class="w-full bg-slate-950/90 border border-slate-800 rounded-2xl py-2.5 pl-9 pr-4 text-white font-bold text-lg focus:outline-none focus:border-amber-500 transition">
+                </div>
+                <div id="impulseWarning" class="text-[10px] text-amber-400/80 mt-1 hidden font-medium"></div>
+            </div>
+
+            <!-- Item & Category Selector -->
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[11px] text-slate-400 block mb-1">किस चीज़ पर? (Item)</label>
+                    <input type="text" id="item" required placeholder="जैसे: चाय, राशन" 
+                        class="w-full bg-slate-950/90 border border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-amber-500 transition">
+                </div>
+                <div>
+                    <label class="text-[11px] text-slate-400 block mb-1">केटेगरी (Category)</label>
+                    <select id="category" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl py-2 px-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition">
+                        <option value="🍔 खाना">🍔 खाना-नाश्ता</option>
+                        <option value="🚌 यात्रा">🚌 यात्रा/पेट्रोल</option>
+                        <option value="📱 रीचार्ज">📱 रीचार्ज/बिल</option>
+                        <option value="🏠 किराया">🏠 कमरा किराया</option>
+                        <option value="🛒 राशन">🛒 राशन/सब्जी</option>
+                        <option value="💊 दवाई">💊 सेहत/दवाई</option>
+                        <option value="🛍️ शॉपिंग">🛍️ शॉपिंग</option>
+                        <option value="🤝 उधार">🤝 उधार/लेन-देन</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Item / Reason -->
-            <div>
-                <label class="text-xs text-slate-400 block mb-1">किस चीज़ पर खर्च हुआ? (Item)</label>
-                <input type="text" id="item" required placeholder="जैसे: नाश्ता, चाय, पेट्रोल" 
-                    class="w-full bg-slate-950/80 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-amber-500 transition">
-            </div>
-
-            <!-- Person / Shop -->
-            <div>
-                <label class="text-xs text-slate-400 block mb-1">किसको दिया? (Person / Shop)</label>
-                <input type="text" id="paidTo" placeholder="जैसे: शर्मा स्वीट्स, दोस्त" 
-                    class="w-full bg-slate-950/80 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-amber-500 transition">
+            <!-- Person & Payment Mode -->
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[11px] text-slate-400 block mb-1">किसको दिया? (Paid To)</label>
+                    <input type="text" id="paidTo" placeholder="जैसे: शर्मा जी, दोस्त" 
+                        class="w-full bg-slate-950/90 border border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-amber-500 transition">
+                </div>
+                <div>
+                    <label class="text-[11px] text-slate-400 block mb-1">माध्यम (Mode)</label>
+                    <select id="paymentMode" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition">
+                        <option value="UPI">UPI (PhonePe/GPay)</option>
+                        <option value="Cash">Cash (नकद)</option>
+                        <option value="Card">Card</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Location Input + GPS -->
             <div>
-                <label class="text-xs text-slate-400 block mb-1">कहाँ खर्च किया? (Location)</label>
+                <label class="text-[11px] text-slate-400 block mb-1">कहाँ खर्च किया? (Location)</label>
                 <div class="flex gap-2">
                     <input type="text" id="location" placeholder="जैसे: फ्रीगंज, टावर चौक" 
-                        class="w-full bg-slate-950/80 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-amber-500 transition">
-                    <button type="button" onclick="getGPSLocation()" title="GPS से लोकेशन भरें"
-                        class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-300 border border-amber-500/40 px-3.5 rounded-xl transition flex items-center justify-center">
+                        class="w-full bg-slate-950/90 border border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-amber-500 transition">
+                    <button type="button" onclick="getGPSLocation()" title="GPS से लोकेशन लें"
+                        class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-300 border border-amber-500/40 px-3 rounded-xl transition flex items-center justify-center">
                         <i data-lucide="map-pin" class="w-4 h-4"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Payment Mode -->
-            <div>
-                <label class="text-xs text-slate-400 block mb-1">पेमेंट माध्यम (Mode)</label>
-                <select id="paymentMode" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-slate-200 focus:outline-none focus:border-amber-500 transition">
-                    <option value="UPI">UPI (PhonePe / GPay / Paytm)</option>
-                    <option value="Cash">Cash (नकद)</option>
-                    <option value="Card">Card</option>
-                </select>
-            </div>
-
             <!-- BIG SHANDAR ACTION BUTTON -->
             <button type="submit" 
-                class="w-full mt-3 bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-extrabold py-4 rounded-2xl transition transform active:scale-95 shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 text-base">
-                <i data-lucide="check-circle-2" class="w-5 h-5"></i> खर्चा जोड़ें (Save Expense)
+                class="w-full mt-2 bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-extrabold py-3.5 rounded-2xl transition transform active:scale-95 shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 text-base">
+                <i data-lucide="check-circle-2" class="w-5 h-5"></i> खर्चा सेव करें (Save Expense)
             </button>
         </form>
 
-        <!-- HISTORY SECTION -->
-        <section class="space-y-3 pt-2">
-            <div class="flex justify-between items-center px-1">
-                <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
-                    <i data-lucide="history" class="w-4 h-4 text-amber-400"></i> खर्चों का हिसाब (History)
-                </h2>
-                <span id="txCount" class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700">0 एंटी</span>
+        <!-- ANALYTICS CHART TOGGLE -->
+        <div class="glass-card rounded-2xl p-4 border border-slate-800">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="pie-chart" class="w-4 h-4 text-amber-400"></i> खर्च विश्लेषण (Analytics)
+                </h3>
+                <span class="text-[10px] text-slate-400">श्रेणी अनुसार ग्राफ</span>
+            </div>
+            <div class="h-44 relative flex items-center justify-center">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- SEARCH & HISTORY SECTION -->
+        <section class="space-y-3 pt-1">
+            <div class="flex flex-col gap-2 px-1">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
+                        <i data-lucide="history" class="w-4 h-4 text-amber-400"></i> खर्चों का हिसाब (History)
+                    </h2>
+                    <span id="txCount" class="text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full border border-slate-700">0 एंट्रियां</span>
+                </div>
+                <!-- Search input -->
+                <div class="relative">
+                    <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500"></i>
+                    <input type="text" id="searchInput" onkeyup="renderExpenses()" placeholder="खोजें (स्थान, नाम, चीज़)..." 
+                        class="w-full bg-slate-900 border border-slate-800 rounded-xl py-1.5 pl-8 pr-3 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                </div>
             </div>
 
-            <div id="expenseList" class="space-y-2.5">
-                <!-- Transactions dynamically render here -->
+            <!-- HISTORY LIST -->
+            <div id="expenseList" class="space-y-2">
+                <!-- Data dynamically inserted here -->
+            </div>
+
+            <!-- EXPORT & WHATSAPP BUTTONS -->
+            <div class="grid grid-cols-2 gap-2 pt-2">
+                <button onclick="shareOnWhatsApp()" class="bg-emerald-600/20 border border-emerald-500/40 hover:bg-emerald-600/30 text-emerald-300 text-xs py-2.5 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="share-2" class="w-3.5 h-3.5"></i> WhatsApp पर भेजें
+                </button>
+                <button onclick="exportJSONBackup()" class="bg-indigo-600/20 border border-indigo-500/40 hover:bg-indigo-600/30 text-indigo-300 text-xs py-2.5 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i> डेटा बैकअप (JSON)
+                </button>
             </div>
         </section>
 
@@ -195,6 +283,26 @@
     <script>
         let monthlyIncome = parseFloat(localStorage.getItem('hisab_income')) || 9000;
         let expenses = JSON.parse(localStorage.getItem('hisab_expenses')) || [];
+        let isPrivateMode = false;
+        let myChart = null;
+
+        // Sound effect generator using Web Audio API (Zero external files needed)
+        function playCoinSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(987.77, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1318.51, ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.25);
+            } catch(e){}
+        }
 
         // Auto hide splash screen after 2.5 seconds
         setTimeout(() => {
@@ -213,56 +321,140 @@
             }, 600);
         }
 
+        function calculateImpulseWarning() {
+            const amt = parseFloat(document.getElementById('amount').value);
+            const warnEl = document.getElementById('impulseWarning');
+            if (amt > 0 && monthlyIncome > 0) {
+                const percent = ((amt / monthlyIncome) * 100).toFixed(1);
+                warnEl.classList.remove('hidden');
+                warnEl.innerText = `💡 ध्यान दें: यह आपकी ₹${monthlyIncome} सैलरी का ${percent}% है!`;
+            } else {
+                warnEl.classList.add('hidden');
+            }
+        }
+
+        function togglePrivacy() {
+            isPrivateMode = !isPrivateMode;
+            const eyeIcon = document.getElementById('eyeIcon');
+            eyeIcon.setAttribute('data-lucide', isPrivateMode ? 'eye-off' : 'eye');
+            lucide.createIcons();
+            updateUI();
+        }
+
+        function quickAdd(item, amount, category, mode) {
+            document.getElementById('item').value = item;
+            document.getElementById('amount').value = amount;
+            document.getElementById('category').value = category;
+            document.getElementById('paymentMode').value = mode;
+            calculateImpulseWarning();
+        }
+
         function updateUI() {
             const list = document.getElementById('expenseList');
             const displayIncome = document.getElementById('displayIncome');
             const displaySpent = document.getElementById('displaySpent');
             const displayRemaining = document.getElementById('displayRemaining');
             const txCount = document.getElementById('txCount');
+            const dailyLimitText = document.getElementById('dailyLimitText');
+            const budgetStatusTag = document.getElementById('budgetStatusTag');
 
             let totalSpent = 0;
+            const categoryTotals = {};
+
+            expenses.forEach(exp => {
+                totalSpent += parseFloat(exp.amount);
+                const cat = exp.category || '🍔 खाना';
+        categoryTotals[cat] = (categoryTotals[cat] || 0) + parseFloat(exp.amount);
+            });
+
+            const remaining = monthlyIncome - totalSpent;
+            
+            // Daily Limit calculation based on remaining days in month
+            const now = new Date();
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const daysLeft = Math.max(1, daysInMonth - now.getDate() + 1);
+            const dailySafeLimit = Math.max(0, Math.floor(remaining / daysLeft));
+
+            dailyLimitText.innerText = `₹${dailySafeLimit} / दिन (${daysLeft} दिन शेष)`;
+
+            // Update budget status badge
+            if (remaining < 1000) {
+                budgetStatusTag.className = "bg-rose-500/20 border border-rose-500/40 px-2.5 py-1 rounded-full text-[10px] font-bold text-rose-300 animate-pulse";
+                budgetStatusTag.innerText = "⚠️ बजट समाप्त के करीब";
+            } else if (remaining < 3000) {
+                budgetStatusTag.className = "bg-amber-500/20 border border-amber-500/40 px-2.5 py-1 rounded-full text-[10px] font-bold text-amber-300";
+                budgetStatusTag.innerText = "⚡ सचेत रहें";
+            } else {
+                budgetStatusTag.className = "bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full text-[10px] font-bold text-emerald-300";
+                budgetStatusTag.innerText = "सुरक्षित बजट";
+            }
+
+            if (isPrivateMode) {
+                displayIncome.innerText = '••••••';
+                displaySpent.innerText = '••••••';
+                displayRemaining.innerText = '••••••';
+            } else {
+                displayIncome.innerText = `₹${monthlyIncome.toLocaleString('hi-IN')}`;
+                displaySpent.innerText = `₹${totalSpent.toLocaleString('hi-IN')}`;
+                displayRemaining.innerText = `₹${remaining.toLocaleString('hi-IN')}`;
+            }
+
+            renderExpenses();
+            updateChart(categoryTotals);
+        }
+
+        function renderExpenses() {
+            const list = document.getElementById('expenseList');
+            const searchQuery = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            const txCount = document.getElementById('txCount');
             list.innerHTML = '';
 
-            expenses.slice().reverse().forEach((exp, index) => {
-                totalSpent += parseFloat(exp.amount);
-                const actualIndex = expenses.length - 1 - index;
+            const filteredExpenses = expenses.filter(exp => {
+                return (exp.item || '').toLowerCase().includes(searchQuery) ||
+                       (exp.paidTo || '').toLowerCase().includes(searchQuery) ||
+                       (exp.location || '').toLowerCase().includes(searchQuery) ||
+                       (exp.category || '').toLowerCase().includes(searchQuery);
+            });
 
+            txCount.innerText = `${filteredExpenses.length} एंट्रियां`;
+
+            if (filteredExpenses.length === 0) {
+                list.innerHTML = `<div class="glass-card rounded-2xl p-6 text-center text-slate-500 text-xs">कोई खर्चा नहीं मिला।</div>`;
+                return;
+            }
+
+            filteredExpenses.slice().reverse().forEach((exp, index) => {
+                const actualIndex = expenses.indexOf(exp);
                 const card = document.createElement('div');
-                card.className = "glass-card rounded-2xl p-4 flex justify-between items-center border border-slate-800/80 hover:border-amber-500/30 transition";
+                const isUdhaar = exp.isUdhaar;
+
+                card.className = `glass-card rounded-2xl p-3.5 flex justify-between items-center border ${isUdhaar ? 'border-amber-500/50 bg-amber-950/20' : 'border-slate-800/80'} hover:border-amber-500/30 transition`;
+                
                 card.innerHTML = `
                     <div class="space-y-1">
                         <div class="flex items-center gap-2">
-                            <span class="font-bold text-slate-100 text-base">${exp.item}</span>
-                            <span class="text-[9px] font-bold bg-amber-500/10 text-amber-300 px-2 py-0.5 rounded-md border border-amber-500/20">${exp.mode}</span>
+                            <span class="font-bold text-slate-100 text-sm">${exp.item}</span>
+                            <span class="text-[9px] font-bold bg-amber-500/10 text-amber-300 px-2 py-0.5 rounded-md border border-amber-500/20">${exp.category || 'खर्चा'}</span>
+                            ${isUdhaar ? `<span class="text-[9px] font-bold bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded">उधार</span>` : ''}
                         </div>
-                        <div class="text-xs text-slate-400 flex flex-wrap gap-x-3 gap-y-0.5">
-                            ${exp.paidTo ? `<span class="flex items-center gap-1">👤 ${exp.paidTo}</span>` : ''}
-                            ${exp.location ? `<span class="flex items-center gap-1">📍 ${exp.location}</span>` : ''}
+                        <div class="text-[11px] text-slate-400 flex flex-wrap gap-x-3 gap-y-0.5">
+                            ${exp.paidTo ? `<span>👤 ${exp.paidTo}</span>` : ''}
+                            ${exp.location ? `<span>📍 ${exp.location}</span>` : ''}
+                            <span class="text-[9px] text-indigo-300 bg-indigo-950 px-1.5 py-0.2 rounded">${exp.mode}</span>
                         </div>
-                        <div class="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
-                            <i data-lucide="clock" class="w-3 h-3"></i> ${exp.dateTime}
-                        </div>
+                        <div class="text-[9px] text-slate-500">${exp.dateTime}</div>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span class="font-extrabold text-rose-400 text-lg">-₹${parseFloat(exp.amount).toFixed(0)}</span>
+                    <div class="flex items-center gap-2.5">
+                        <span class="font-extrabold ${isUdhaar ? 'text-amber-400' : 'text-rose-400'} text-base">
+                            ${isPrivateMode ? '••••' : `-₹${parseFloat(exp.amount).toFixed(0)}`}
+                        </span>
                         <button onclick="deleteExpense(${actualIndex})" class="text-slate-600 hover:text-rose-400 transition p-1">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                         </button>
                     </div>
                 `;
                 list.appendChild(card);
             });
-
-            const remaining = monthlyIncome - totalSpent;
-
-            displayIncome.innerText = `₹${monthlyIncome.toLocaleString('hi-IN')}`;
-            displaySpent.innerText = `₹${totalSpent.toLocaleString('hi-IN')}`;
-            displayRemaining.innerText = `₹${remaining.toLocaleString('hi-IN')}`;
-            txCount.innerText = `${expenses.length} एंट्री`;
-
-            if (expenses.length === 0) {
-                list.innerHTML = `<div class="glass-card rounded-2xl p-6 text-center text-slate-500 text-xs">अभी तक कोई खर्चा दर्ज नहीं हुआ है। ऊपर से जोड़ना शुरू करें!</div>`;
-            }
 
             lucide.createIcons();
         }
@@ -277,21 +469,33 @@
             const newExp = {
                 amount: document.getElementById('amount').value,
                 item: document.getElementById('item').value,
+                category: document.getElementById('category').value,
                 paidTo: document.getElementById('paidTo').value,
                 location: document.getElementById('location').value,
                 mode: document.getElementById('paymentMode').value,
+                isUdhaar: document.getElementById('isUdhaar').checked,
                 dateTime: `${formattedDate}, ${formattedTime}`
             };
 
             expenses.push(newExp);
             localStorage.setItem('hisab_expenses', JSON.stringify(expenses));
             
+            // Sound and Confetti Effect
+            playCoinSound();
+            confetti({
+                particleCount: 40,
+                spread: 60,
+                origin: { y: 0.8 },
+                colors: ['#f59e0b', '#fbbf24', '#10b981']
+            });
+
             document.getElementById('expenseForm').reset();
+            document.getElementById('impulseWarning').classList.add('hidden');
             updateUI();
         });
 
         function deleteExpense(index) {
-            if (confirm('क्या आप इस खर्चे को हटाना चाहते हैं?')) {
+            if (confirm('क्या आप इस एंट्री को हटाना चाहते हैं?')) {
                 expenses.splice(index, 1);
                 localStorage.setItem('hisab_expenses', JSON.stringify(expenses));
                 updateUI();
@@ -314,11 +518,82 @@
                     const lng = pos.coords.longitude.toFixed(3);
                     document.getElementById('location').value = `GPS (${lat}, ${lng})`;
                 }, () => {
-                    alert('लोकेशन की अनुमति नहीं मिली। आप हाथ से लिख सकते हैं (उदा. फ्रीगंज)।');
+                    alert('लोकेशन अनुमति नहीं मिली। आप हाथ से लिख सकते हैं।');
                 });
             } else {
                 alert('ब्राउज़र में GPS सपोर्ट नहीं है।');
             }
+        }
+
+        function updateChart(categoryTotals) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            const labels = Object.keys(categoryTotals);
+            const data = Object.values(categoryTotals);
+
+            if (labels.length === 0) {
+                if (myChart) myChart.destroy();
+                return;
+            }
+
+            if (myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#f59e0b', '#10b981', '#6366f1', '#ec4899', '#8b5cf6', '#14b8a6', '#f43f5e'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { color: '#cbd5e1', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function shareOnWhatsApp() {
+            if (expenses.length === 0) {
+                alert('शेयर करने के लिए कोई हिसाब नहीं है!');
+                return;
+            }
+
+            let text = `*🪔 श्री लक्ष्मी हिसाब-किताब समरी*\n\n`;
+            text += `💰 *कुल आय:* ₹${monthlyIncome}\n`;
+            
+            let total = 0;
+            expenses.forEach(e => total += parseFloat(e.amount));
+            text += `💸 *कुल खर्च:* ₹${total}\n`;
+            text += `💵 *बचा हुआ बैलेंस:* ₹${monthlyIncome - total}\n\n`;
+            text += `*हाल के खर्चे:*\n`;
+
+            expenses.slice(-5).reverse().forEach(e => {
+                text += `• ${e.item} (${e.category}): ₹${e.amount} ${e.location ? '| 📍' + e.location : ''}\n`;
+            });
+
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        }
+
+        function exportJSONBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+                income: monthlyIncome,
+                expenses: expenses
+            }));
+            const downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", `hisab_backup_${new Date().toISOString().slice(0,10)}.json`);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
         }
     </script>
 </body>
