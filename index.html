@@ -3,25 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>लक्ष्मी हिसाब-किताब (Laxmi Hisab-Kitab - Premium Edition)</title>
+  <title>लक्ष्मी हिसाब-किताब (Laxmi Hisab-Kitab - Ultimate Animation Edition)</title>
 
   <!-- External Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     :root {
-      --bg-gradient: linear-gradient(135deg, #0d0f12, #1a1d24);
-      --card-bg: rgba(255, 255, 255, 0.05);
-      --card-border: rgba(255, 215, 0, 0.2);
+      --bg-gradient: linear-gradient(135deg, #080a0f 0%, #121824 50%, #080a0f 100%);
+      --card-bg: rgba(22, 28, 42, 0.65);
+      --card-border: rgba(255, 215, 0, 0.25);
       --accent-gold: #ffd700;
-      --accent-gold-glow: rgba(255, 215, 0, 0.4);
-      --text-main: #f5f5f7;
-      --text-sub: #a1a1a6;
-      --green-glow: #2ed573;
-      --red-glow: #ff4757;
-      --blue-glow: #1e90ff;
+      --accent-gold-glow: rgba(255, 215, 0, 0.5);
+      --text-main: #ffffff;
+      --text-sub: #94a3b8;
+      --green-glow: #10b981;
+      --red-glow: #ef4444;
+      --blue-glow: #3b82f6;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -30,372 +32,317 @@
       background: var(--bg-gradient);
       color: var(--text-main);
       min-height: 100vh;
-      padding-bottom: 60px;
+      padding-bottom: 70px;
+      overflow-x: hidden;
     }
 
-    /* ==========================================
-       Water Drop Water-Bubble PIN Lock Screen
-       ========================================== */
+    /* Dynamic Background Water Animation */
+    .bg-animation {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none; z-index: -1; overflow: hidden;
+    }
+
+    .bubble {
+      position: absolute; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,215,0,0.15), rgba(255,215,0,0.01));
+      border: 1px solid rgba(255,215,0,0.15);
+      animation: floatUp 12s infinite linear;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(105vh) scale(0.5); opacity: 0; }
+      20% { opacity: 0.8; }
+      80% { opacity: 0.8; }
+      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+    }
+
+    /* Water-Drop Lock Screen */
     #pinOverlay {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: radial-gradient(circle at center, #1e2638 0%, #090a0f 100%);
+      background: radial-gradient(circle at center, rgba(18, 24, 38, 0.98) 0%, rgba(8, 10, 15, 0.99) 100%);
       z-index: 10000;
       display: flex; flex-direction: column; justify-content: center; align-items: center;
-      backdrop-filter: blur(20px);
+      backdrop-filter: blur(25px);
+      animation: fadeIn 0.5s ease-out;
     }
 
     .drop-lock-card {
       background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 30px;
-      padding: 30px 25px;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 35px;
+      padding: 35px 25px;
       text-align: center;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 15px rgba(255,215,0,0.05);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 30px rgba(255, 215, 0, 0.15);
       width: 90%; max-width: 360px;
-      position: relative;
+      position: relative; animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .water-drop-icon {
-      width: 70px; height: 70px;
-      margin: 0 auto 15px;
-      background: radial-gradient(circle at 35% 35%, #ffd700, #b8860b);
+      width: 80px; height: 80px;
+      margin: 0 auto 20px;
+      background: radial-gradient(circle at 35% 35%, #ffe600, #b8860b);
       border-radius: 50% 50% 50% 0;
       transform: rotate(-45deg);
-      box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3), inset -3px -3px 8px rgba(0,0,0,0.4);
+      box-shadow: 0 12px 30px rgba(255, 215, 0, 0.4), inset -4px -4px 10px rgba(0,0,0,0.5);
       display: flex; justify-content: center; align-items: center;
-      animation: dropFloat 3s ease-in-out infinite alternate;
+      animation: dropLiquid 3s ease-in-out infinite alternate;
     }
 
-    .water-drop-icon i {
-      transform: rotate(45deg);
-      font-size: 26px; color: #000;
+    .water-drop-icon i { transform: rotate(45deg); font-size: 30px; color: #000; }
+
+    @keyframes dropLiquid {
+      0% { transform: rotate(-45deg) translateY(0px) scale(1); border-radius: 50% 50% 50% 0; }
+      50% { transform: rotate(-45deg) translateY(-10px) scale(1.05); border-radius: 45% 55% 45% 10%; }
+      100% { transform: rotate(-45deg) translateY(0px) scale(1); border-radius: 50% 50% 50% 0; }
     }
 
-    @keyframes dropFloat {
-      0% { transform: rotate(-45deg) translateY(0px); }
-      100% { transform: rotate(-45deg) translateY(-8px); }
-    }
+    .pin-title { font-size: 22px; font-weight: 700; color: var(--accent-gold); letter-spacing: 0.5px; }
+    .pin-subtitle { font-size: 13px; color: var(--text-sub); margin-top: 4px; margin-bottom: 22px; }
 
-    .pin-title { font-size: 20px; font-weight: 600; color: var(--accent-gold); letter-spacing: 0.5px; }
-    .pin-subtitle { font-size: 12px; color: var(--text-sub); margin-top: 4px; margin-bottom: 20px; }
-
-    /* Water Bubble Indicators */
-    .pin-dots { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
+    .pin-dots { display: flex; justify-content: center; gap: 16px; margin-bottom: 28px; }
     .pin-dot {
-      width: 18px; height: 18px;
+      width: 20px; height: 20px;
       border-radius: 50%;
       border: 2px solid var(--accent-gold);
       background: rgba(255,215,0,0.05);
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-      transition: all 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .pin-dot.filled {
       background: radial-gradient(circle at 30% 30%, #ffffff, var(--accent-gold));
-      box-shadow: 0 0 12px var(--accent-gold);
-      transform: scale(1.15);
-    }
-
-    /* Water Drop Keypad */
+      box-shadow: 0 0 15px var(--accent-gold);
+      transform: scale(1.2);
+    }   
     .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; justify-items: center; }
     .key-btn {
-      width: 65px; height: 65px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,215,0,0.2);
-      color: #fff; font-size: 22px; font-weight: 600;
+      width: 68px; height: 68px; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,215,0,0.25);
+      color: #fff; font-size: 24px; font-weight: 600;
       display: flex; justify-content: center; align-items: center;
-      cursor: pointer;
-      box-shadow: 0 8px 15px rgba(0,0,0,0.4), inset 0 2px 5px rgba(255,255,255,0.2);
-      transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      position: relative; overflow: hidden;
+      cursor: pointer; position: relative; overflow: hidden;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 2px 6px rgba(255,255,255,0.3);
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .key-btn:active {
-      transform: scale(0.9);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.6), inset 0 0 12px var(--accent-gold);
+      transform: scale(0.88);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.7), inset 0 0 15px var(--accent-gold);
     }
 
-    /* Ripple Effect */
-    .ripple {
+    /* Water Ripple Effect */
+    .water-ripple {
       position: absolute; border-radius: 50%;
-      background: rgba(255, 215, 0, 0.5);
-      transform: scale(0); animation: rippleEffect 0.4s linear;
+      background: radial-gradient(circle, rgba(255,215,0,0.8) 0%, rgba(255,215,0,0) 70%);
+      transform: scale(0); animation: rippleAnim 0.5s ease-out;
       pointer-events: none;
     }
-    @keyframes rippleEffect {
-      to { transform: scale(3); opacity: 0; }
+    @keyframes rippleAnim {
+      to { transform: scale(3.5); opacity: 0; }
     }
 
-    /* ==========================================
-       Main Premium Layout
-       ========================================== */
+    /* Layout & Header */
     header {
-      background: rgba(13, 15, 18, 0.8);
-      backdrop-filter: blur(15px);
-      padding: 16px 20px;
+      background: rgba(18, 24, 38, 0.85);
+      backdrop-filter: blur(20px);
+      padding: 18px 20px;
       text-align: center;
       border-bottom: 1px solid var(--card-border);
       position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
 
     .app-title {
-      font-size: 20px; font-weight: 700;
-      background: linear-gradient(135deg, #ffd700, #ffaa00);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 22px; font-weight: 800;
+      background: linear-gradient(135deg, #ffe600, #ffaa00);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       letter-spacing: 0.5px;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
     }
 
-    .container { max-width: 550px; margin: auto; padding: 15px; }
+    .container { max-width: 550px; margin: auto; padding: 18px; }
 
-    /* Cards */
+    /* Animated Cards */
     .card {
       background: var(--card-bg);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(15px);
       border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 18px; margin-bottom: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      border-radius: 24px;
+      padding: 20px; margin-bottom: 18px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: transform 0.3s ease, border-color 0.3s ease;
     }
+
+    .card:hover { border-color: rgba(255,215,0,0.45); }
 
     .balance-card {
       text-align: center;
-      background: linear-gradient(145deg, rgba(255,215,0,0.08), rgba(20,20,25,0.6));
+      background: linear-gradient(145deg, rgba(255,215,0,0.12), rgba(18,24,38,0.8));
       border: 1px solid var(--accent-gold);
-      position: relative;
+      position: relative; overflow: hidden;
     }
+
+    .balance-card::before {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 60%);
+      animation: rotateGlow 10s linear infinite; pointer-events: none;
+    }
+
+    @keyframes rotateGlow { 100% { transform: rotate(360deg); } }
 
     .eye-btn {
       position: absolute; top: 18px; right: 18px;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-      color: var(--text-sub); border-radius: 50%; width: 36px; height: 36px;
-      cursor: pointer; transition: 0.2s;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      color: var(--accent-gold); border-radius: 50%; width: 40px; height: 40px;
+      cursor: pointer; transition: all 0.2s; z-index: 2;
+      display: flex; justify-content: center; align-items: center;
     }
-    .eye-btn:hover { color: var(--accent-gold); border-color: var(--accent-gold); }
+    .eye-btn:hover { transform: scale(1.1); background: rgba(255,215,0,0.2); }
 
-    .balance-title { font-size: 13px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
-    .balance-amount { font-size: 34px; font-weight: 800; color: var(--accent-gold); margin: 8px 0; text-shadow: 0 0 20px var(--accent-gold-glow); }
+    .balance-title { font-size: 12px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; z-index: 2; position: relative; }
+    .balance-amount {
+      font-size: 38px; font-weight: 800; color: var(--accent-gold);
+      margin: 8px 0; text-shadow: 0 0 25px var(--accent-gold-glow);
+      z-index: 2; position: relative; transition: all 0.3s;
+    }
 
     .smart-barometer {
-      display: flex; justify-content: space-between; background: rgba(0,0,0,0.4);
-      padding: 10px 15px; border-radius: 12px; margin-top: 12px; font-size: 12px; border: 1px solid rgba(255,255,255,0.05);
+      display: flex; justify-content: space-between; background: rgba(0,0,0,0.45);
+      padding: 12px 16px; border-radius: 14px; margin-top: 14px; font-size: 13px;
+      border: 1px solid rgba(255,255,255,0.08); z-index: 2; position: relative;
     }
 
     .alert-banner {
-      background: rgba(255, 71, 87, 0.15); border: 1px solid var(--red-glow);
-      color: #ff6b81; padding: 12px; border-radius: 12px; margin-bottom: 15px;
-      font-size: 13px; display: none; text-align: center;
+      background: rgba(239, 68, 68, 0.2); border: 1px solid var(--red-glow);
+      color: #fca5a5; padding: 12px; border-radius: 14px; margin-bottom: 18px;
+      font-size: 13px; display: none; text-align: center; animation: pulseAlert 2s infinite;
     }
+    @keyframes pulseAlert { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 
     /* Quick Chips */
-    .chips-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 12px; }
+    .chips-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 14px; }
     .chip {
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-      padding: 8px 14px; border-radius: 20px; font-size: 12px; white-space: nowrap;
-      cursor: pointer; transition: all 0.2s; color: var(--text-main);
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      padding: 9px 16px; border-radius: 25px; font-size: 12px; white-space: nowrap;
+      cursor: pointer; transition: all 0.25s; color: var(--text-main);
     }
-    .chip:hover { border-color: var(--accent-gold); background: rgba(255,215,0,0.1); }
+    .chip:hover { border-color: var(--accent-gold); background: rgba(255,215,0,0.15); transform: translateY(-2px); }
 
-    /* Form Inputs */
-    .form-group { margin-bottom: 12px; }
-    label { font-size: 11px; color: var(--text-sub); text-transform: uppercase; margin-bottom: 5px; display: block; }
+    /* Form Controls */
+    .form-group { margin-bottom: 14px; }
+    label { font-size: 11px; color: var(--text-sub); text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 0.5px; }
     input, select {
-      width: 100%; padding: 12px; border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.5);
-      color: #fff; font-size: 14px; outline: none; transition: 0.2s;
+      width: 100%; padding: 14px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.15); background: rgba(10, 14, 22, 0.6);
+      color: #fff; font-size: 14px; outline: none; transition: 0.25s;
     }
-    input:focus, select:focus { border-color: var(--accent-gold); box-shadow: 0 0 10px var(--accent-gold-glow); }
+    input:focus, select:focus { border-color: var(--accent-gold); box-shadow: 0 0 15px var(--accent-gold-glow); }
 
     .input-row { display: flex; gap: 10px; }
 
     .mic-btn {
-      background: rgba(255, 215, 0, 0.1); color: var(--accent-gold);
-      border: 1px solid var(--accent-gold); width: 48px; border-radius: 10px;
+      background: rgba(255, 215, 0, 0.12); color: var(--accent-gold);
+      border: 1px solid var(--accent-gold); width: 50px; border-radius: 12px;
       cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px;
+      transition: all 0.2s;
     }
-    .mic-btn.recording { background: var(--red-glow); color: #fff; border-color: var(--red-glow); animation: pulse 1s infinite; }
-
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    .mic-btn.recording { background: var(--red-glow); color: #fff; border-color: var(--red-glow); animation: pulseMic 1s infinite; }
+    @keyframes pulseMic { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
     .btn {
-      width: 100%; padding: 14px; border: none; border-radius: 12px;
-      font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s;
+      width: 100%; padding: 15px; border: none; border-radius: 14px;
+      font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.25s;
       display: flex; justify-content: center; align-items: center; gap: 8px;
     }
     .btn-gold {
-      background: linear-gradient(135deg, #ffd700, #ffa500);
-      color: #000; box-shadow: 0 4px 15px rgba(255,215,0,0.3);
+      background: linear-gradient(135deg, #ffe600, #ffaa00);
+      color: #000; box-shadow: 0 6px 20px rgba(255,215,0,0.35);
     }
-    .btn-gold:hover { opacity: 0.95; transform: translateY(-1px); }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,215,0,0.5); }
+    .btn-gold:active { transform: translateY(0); }
+
     .btn-outline { background: transparent; border: 1px solid var(--accent-gold); color: var(--accent-gold); }
+    .btn-outline:hover { background: rgba(255,215,0,0.1); }
 
-    /* Type Selector */
-    .type-selector { display: flex; gap: 8px; margin-bottom: 12px; }
+    /* Type Switcher */
+    .type-selector { display: flex; gap: 8px; margin-bottom: 14px; }
     .type-btn {
-      flex: 1; padding: 10px 4px; text-align: center; border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px; font-size: 11px; cursor: pointer; background: rgba(0,0,0,0.3); color: var(--text-sub);
+      flex: 1; padding: 12px 6px; text-align: center; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; font-size: 12px; cursor: pointer; background: rgba(0,0,0,0.4); color: var(--text-sub);
+      transition: all 0.25s;
     }
-    .type-btn.active { border-color: var(--accent-gold); background: rgba(255,215,0,0.15); color: var(--accent-gold); font-weight: bold; }
+    .type-btn.active { border-color: var(--accent-gold); background: rgba(255,215,0,0.18); color: var(--accent-gold); font-weight: bold; }
 
-    /* Heatmap */
-    .heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
-    .heatmap-day { padding: 8px 2px; border-radius: 6px; font-size: 10px; text-align: center; background: rgba(255,255,255,0.03); }
-    .heat-low { background: rgba(46, 213, 115, 0.3); border: 1px solid #2ed573; }
-    .heat-mid { background: rgba(255, 165, 0, 0.3); border: 1px solid #ffa500; }
-    .heat-high { background: rgba(255, 71, 87, 0.3); border: 1px solid #ff4757; }
+    /* Heatmap Grid */
+    .heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 12px; }
+    .heatmap-day { padding: 10px 2px; border-radius: 8px; font-size: 11px; text-align: center; background: rgba(255,255,255,0.03); transition: transform 0.2s; }
+    .heatmap-day:hover { transform: scale(1.1); }
+    .heat-low { background: rgba(16, 185, 129, 0.25); border: 1px solid #10b981; }
+    .heat-mid { background: rgba(245, 158, 11, 0.25); border: 1px solid #f59e0b; }
+    .heat-high { background: rgba(239, 68, 68, 0.25); border: 1px solid #ef4444; }
 
-    /* List Items */
+    /* Transaction List Items */
     .tx-item {
       display: flex; justify-content: space-between; align-items: center;
-      background: rgba(0,0,0,0.3); padding: 12px 15px; border-radius: 12px;
-      margin-bottom: 8px; border-left: 4px solid var(--accent-gold);
+      background: rgba(10, 14, 22, 0.5); padding: 14px 16px; border-radius: 14px;
+      margin-bottom: 10px; border-left: 4px solid var(--accent-gold);
+      animation: fadeIn 0.4s ease-out; transition: all 0.2s;
     }
+    .tx-item:hover { transform: translateX(3px); background: rgba(10, 14, 22, 0.8); }
     .tx-item.income { border-left-color: var(--green-glow); }
     .tx-item.expense { border-left-color: var(--red-glow); }
     .tx-item.lend { border-left-color: var(--blue-glow); }
-    .tx-settled { opacity: 0.4; text-decoration: line-through; }
+    .tx-settled { opacity: 0.45; text-decoration: line-through; }
 
     .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
   </style>
 </head>
 <body>
 
-  <!-- Water Drop Aesthetic PIN Lock Screen -->
+  <!-- Floating Water Bubbles Background -->
+  <div class="bg-animation">
+    <div class="bubble" style="width:80px; height:80px; left:10%; animation-duration:10s;"></div>
+    <div class="bubble" style="width:40px; height:40px; left:30%; animation-duration:14s; animation-delay:2s;"></div>
+    <div class="bubble" style="width:60px; height:60px; left:65%; animation-duration:11s; animation-delay:1s;"></div>
+    <div class="bubble" style="width:100px; height:100px; left:85%; animation-duration:16s; animation-delay:3s;"></div>
+  </div>
+
+  <!-- Water-Drop Aesthetic PIN Lock Screen -->
   <div id="pinOverlay">
     <div class="drop-lock-card">
       <div class="water-drop-icon">
-        <i class="fa-solid fa-lock"></i>
-      </div>
-      <div class="pin-title">सुरक्षा PIN</div>
-      <div class="pin-subtitle">जल-बूंद सुरक्षा द्वारा सुरक्षित</div>
 
-      <div class="pin-dots">
-        <div class="pin-dot" id="dot-1"></div>
-        <div class="pin-dot" id="dot-2"></div>
-        <div class="pin-dot" id="dot-3"></div>
-        <div class="pin-dot" id="dot-4"></div>
-      </div>
-
-      <div class="keypad-grid">
-        <div class="key-btn" onclick="pressKey('1', event)">1</div>
-        <div class="key-btn" onclick="pressKey('2', event)">2</div>
-        <div class="key-btn" onclick="pressKey('3', event)">3</div>
-        <div class="key-btn" onclick="pressKey('4', event)">4</div>
-        <div class="key-btn" onclick="pressKey('5', event)">5</div>
-        <div class="key-btn" onclick="pressKey('6', event)">6</div>
-        <div class="key-btn" onclick="pressKey('7', event)">7</div>
-        <div class="key-btn" onclick="pressKey('8', event)">8</div>
-        <div class="key-btn" onclick="pressKey('9', event)">9</div>
-        <div class="key-btn" onclick="clearPin(event)"><i class="fa-solid fa-rotate-left" style="font-size:16px;"></i></div>
-        <div class="key-btn" onclick="pressKey('0', event)">0</div>
-        <div class="key-btn" onclick="deleteDigit(event)"><i class="fa-solid fa-backspace" style="font-size:16px;"></i></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Header -->
-  <header>
-    <div class="app-title"><i class="fa-solid fa-coins"></i> लक्ष्मी हिसाब-किताब</div>
-  </header>
-
-  <div class="container">
-
-    <!-- Predictive Warning Banner -->
-    <div id="alertBanner" class="alert-banner">
-      <i class="fa-solid fa-triangle-exclamation"></i> <span id="alertText">चेतावनी! खर्च तेज़ी से हो रहा है।</span>
-    </div>
-
-    <!-- Balance & Daily Barometer Card -->
-    <div class="card balance-card">
-      <button class="eye-btn" onclick="toggleEye()"><i id="eyeIcon" class="fa-solid fa-eye"></i></button>
-      <div class="balance-title">कुल बचत / शेष बैलेंस</div>
-      <div class="balance-amount" id="balanceDisplay">₹0.00</div>
-      
-      <div class="smart-barometer">
-        <div><i class="fa-solid fa-sun" style="color:var(--accent-gold);"></i> आज की सेफ लिमिट: <strong id="dailyLimitDisplay" style="color:var(--accent-gold);">₹0</strong></div>
-        <div><i class="fa-solid fa-hourglass-half"></i> बाकी: <strong id="daysLeftDisplay">0 दिन</strong></div>
-      </div>
-    </div>
-
-    <!-- Quick Entry Chips -->
-    <div class="chips-container">
-      <div class="chip" onclick="quickFill(10, '☕ चाय-नाश्ता', 'खाना-नाश्ता')">☕ ₹10 चाय</div>
-      <div class="chip" onclick="quickFill(20, '🚌 बस किराया', 'यात्रा')">🚌 ₹20 बस</div>
-      <div class="chip" onclick="quickFill(100, '⛽ पेट्रोल', 'यात्रा')">⛽ ₹100 पेट्रोल</div>
-      <div class="chip" onclick="quickFill(239, '📱 रिचार्ज', 'रीचार्ज')">📱 ₹239 रिचार्ज</div>
-      <div class="chip" onclick="quickFill(500, '🛒 राशन', 'खरीदारी')">🛒 ₹500 राशन</div>
-    </div>
-
-    <!-- Main Entry Form -->
+            <!-- Animated Expense Pie Chart -->
     <div class="card">
-      <div style="font-weight:700; margin-bottom:12px; color:var(--accent-gold); font-size:15px;">
-        <i class="fa-solid fa-pen-to-square"></i> नया हिसाब जोड़ें
-      </div>
-      
-      <div class="type-selector">
-        <div class="type-btn active" id="typeExpense" onclick="setType('expense')">💸 खर्चा</div>
-        <div class="type-btn" id="typeIncome" onclick="setType('income')">💰 आय</div>
-        <div class="type-btn" id="typeLend" onclick="setType('lend')">🤝 उधार दिया</div>
-        <div class="type-btn" id="typeBorrow" onclick="setType('borrow')">📥 उधार लिया</div>
-      </div>
-
-      <div class="form-group">
-        <label>विवरण / आइटम (बोलकर भरें)</label>
-        <div class="input-row">
-          <input type="text" id="txDesc" placeholder="उदा. नाश्ता, पेट्रोल, शर्मा जी">
-          <button class="mic-btn" id="micBtn" onclick="startVoiceRecognition()"><i class="fa-solid fa-microphone"></i></button>
-        </div>
-      </div>
-
-      <div class="input-row">
-        <div class="form-group" style="flex:1;">
-          <label>रकम (₹)</label>
-          <input type="number" id="txAmount" placeholder="0">
-        </div>
-        <div class="form-group" style="flex:1;">
-          <label>श्रेणी (Emoji)</label>
-          <select id="txCategory">
-            <option value="खाना-नाश्ता">🍔 खाना-नाश्ता</option>
-            <option value="यात्रा">🚌 यात्रा/पेट्रोल</option>
-            <option value="रीचार्ज">📱 रीचार्ज/बिल</option>
-            <option value="कमरा किराया">🏠 कमरा किराया</option>
-            <option value="दवाई">💊 दवाई/स्वास्थ्य</option>
-            <option value="खरीदारी">🛍️ खरीदारी</option>
-            <option value="उधार/अन्य">🤝 उधार/अन्य</option>
-          </select>
-        </div>
-      </div>
-
-      <button class="btn btn-gold" onclick="addTransaction()"><i class="fa-solid fa-check-circle"></i> सहेजें (Save Entry)</button>
-    </div>
-
-    <!-- Interactive Pie Chart -->
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:10px; font-size:14px;"><i class="fa-solid fa-chart-pie"></i> खर्च विश्लेषक (Pie Chart)</div>
-      <canvas id="categoryChart" style="max-height: 210px;"></canvas>
+      <div style="font-weight:700; margin-bottom:12px; font-size:15px;"><i class="fa-solid fa-chart-pie"></i> खर्च का विश्लेषक (Pie Chart)</div>
+      <canvas id="categoryChart" style="max-height: 220px;"></canvas>
     </div>
 
     <!-- Heatmap Calendar -->
     <div class="card">
-      <div style="font-weight:700; margin-bottom:6px; font-size:14px;"><i class="fa-solid fa-calendar-days"></i> खर्चों का हीटमैप कैलेंडर</div>
+      <div style="font-weight:700; margin-bottom:8px; font-size:15px;"><i class="fa-solid fa-calendar-days"></i> माह का हीटमैप कैलेंडर</div>
       <div class="heatmap-grid" id="heatmapGrid"></div>
     </div>
 
-    <!-- Impulse Buy Calculator -->
+    <!-- Impulse Calculator -->
     <div class="card">
-      <div style="font-weight:700; margin-bottom:8px; color:var(--accent-gold); font-size:14px;"><i class="fa-solid fa-lightbulb"></i> 'सोच समझकर खरीदें' कैलकुलेटर</div>
+      <div style="font-weight:700; margin-bottom:8px; color:var(--accent-gold); font-size:15px;"><i class="fa-solid fa-lightbulb"></i> सोच-समझकर खरीदें (Impulse Tool)</div>
       <div class="input-row">
-        <input type="number" id="impulsePrice" placeholder="खरीदने वाली चीज़ की कीमत ₹">
-        <button class="btn btn-outline" style="width: auto; padding:0 20px;" onclick="calcImpulse()">जाँचें</button>
+        <input type="number" id="impulsePrice" placeholder="कीमत दर्ज करें ₹">
+        <button class="btn btn-outline" style="width: auto; padding:0 22px;" onclick="calcImpulse()">जाँचें</button>
       </div>
-      <div id="impulseResult" style="font-size:12px; margin-top:8px; color:var(--text-sub);"></div>
+      <div id="impulseResult" style="font-size:12px; margin-top:10px; color:var(--text-sub);"></div>
     </div>
 
-    <!-- History & Search -->
+    <!-- History List -->
     <div class="card">
-      <div style="font-weight:700; margin-bottom:10px; font-size:14px;"><i class="fa-solid fa-list-check"></i> लेन-देन इतिहास</div>
-      <div class="input-row" style="margin-bottom:12px;">
-        <input type="text" id="searchInput" placeholder="खोजें (नाम, स्थान...)" onkeyup="renderTransactions()" style="flex:2;">
+      <div style="font-weight:700; margin-bottom:12px; font-size:15px;"><i class="fa-solid fa-list-check"></i> लेन-देन का इतिहास</div>
+      <div class="input-row" style="margin-bottom:14px;">
+        <input type="text" id="searchInput" placeholder="खोजें (नाम, आइटम...)" onkeyup="renderTransactions()" style="flex:2;">
         <select id="filterMonth" onchange="renderTransactions()" style="flex:1;">
           <option value="ALL">सभी महीने</option>
         </select>
@@ -404,14 +351,15 @@
       <div id="txList"></div>
     </div>
 
-    <!-- WhatsApp & Backup Tools -->
+    <!-- Export & Share Tools (Excel, PDF, WhatsApp) -->
     <div class="card">
-      <div style="font-weight:700; margin-bottom:10px; font-size:14px;"><i class="fa-solid fa-share-nodes"></i> शेयर व बैकअप</div>
+      <div style="font-weight:700; margin-bottom:12px; font-size:15px;"><i class="fa-solid fa-file-export"></i> एक्सपोर्ट व रिपोर्ट टूल्स</div>
       <div class="action-grid">
+        <button class="btn btn-outline" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> PDF रिपोर्ट</button>
+        <button class="btn btn-outline" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Excel शीट</button>
         <button class="btn btn-outline" onclick="shareWhatsApp()"><i class="fa-brands fa-whatsapp"></i> WhatsApp शेयर</button>
-        <button class="btn btn-outline" onclick="downloadCSV()"><i class="fa-solid fa-file-excel"></i> Excel (CSV)</button>
         <button class="btn btn-outline" onclick="exportJSON()"><i class="fa-solid fa-download"></i> बैकअप (JSON)</button>
-        <button class="btn btn-outline" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> रीस्टोर</button>
+        <button class="btn btn-outline" style="grid-column: span 2;" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> पुराना बैकअप रीस्टोर करें</button>
         <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
       </div>
     </div>
@@ -419,7 +367,7 @@
   </div>
 
   <script>
-    // State Variables
+    // State Management
     let transactions = JSON.parse(localStorage.getItem('laxmi_txs')) || [];
     let currentType = 'expense';
     let isHidden = false;
@@ -428,7 +376,7 @@
     let userPIN = localStorage.getItem('laxmi_pin') || '1234';
     let monthlyBudget = 10000;
 
-    // Web Audio Synthesizers (Water Drop Sound & Coin Sound)
+    // Web Audio Synthesizers (Water Drop Sound)
     function playWaterDropSound() {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -436,20 +384,19 @@
         const gain = audioCtx.createGain();
 
         osc.type = 'sine';
-        // Pitch sweep for realistic liquid "plop/drop" sound
-        osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
-        osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.15);
+        osc.frequency.setValueAtTime(450, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1250, audioCtx.currentTime + 0.04);
+        osc.frequency.exponentialRampToValueAtTime(350, audioCtx.currentTime + 0.16);
 
         gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.16);
 
         osc.connect(gain);
         gain.connect(audioCtx.destination);
 
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.18);
-      } catch(e) { console.log(e); }
+        osc.stop(audioCtx.currentTime + 0.16);
+      } catch(e) {}
     }
 
     function playCoinSound() {
@@ -461,29 +408,30 @@
         osc.frequency.setValueAtTime(987.77, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(1318.51, audioCtx.currentTime + 0.08);
         gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.3);
+        osc.stop(audioCtx.currentTime + 0.25);
       } catch(e) {}
     }
 
-    // Ripple Animation
+    // Ripple Effect Logic
     function createRipple(e) {
       const btn = e.currentTarget;
       const circle = document.createElement("span");
       const diameter = Math.max(btn.clientWidth, btn.clientHeight);
       circle.style.width = circle.style.height = `${diameter}px`;
-      circle.style.left = `${e.clientX - btn.offsetLeft - diameter / 2}px`;
-      circle.style.top = `${e.clientY - btn.offsetTop - diameter / 2}px`;
-      circle.classList.add("ripple");
-      const ripple = btn.getElementsByClassName("ripple")[0];
-      if (ripple) ripple.remove();
+      circle.style.left = `${e.clientX - btn.getBoundingClientRect().left - diameter / 2}px`;
+      circle.style.top = `${e.clientY - btn.getBoundingClientRect().top - diameter / 2}px`;
+      circle.classList.add("water-ripple");
+      
+      const existingRipple = btn.getElementsByClassName("water-ripple")[0];
+      if (existingRipple) existingRipple.remove();
       btn.appendChild(circle);
     }
 
-    // PIN Keypad Functions
+    // Keypad Logic
     function pressKey(num, e) {
       if(e) createRipple(e);
       playWaterDropSound();
@@ -517,25 +465,24 @@
         else dot.classList.remove('filled');
       }
     }
-
-    function verifyPin() {
+        function verifyPin() {
       if(enteredPin === userPIN) {
         document.getElementById('pinOverlay').style.display = 'none';
       } else {
-        alert("गलत PIN! सही PIN भरें (Default: 1234)");
+        alert("गलत PIN! सही PIN डालें (Default PIN: 1234)");
         enteredPin = "";
         updatePinDots();
       }
     }
 
-    // Toggle Eye Mode
+    // Eye Toggle
     function toggleEye() {
       isHidden = !isHidden;
       document.getElementById('eyeIcon').className = isHidden ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
       updateUI();
     }
 
-    // Set Transaction Type
+    // Set Type
     function setType(type) {
       currentType = type;
       document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
@@ -545,7 +492,7 @@
       if(type === 'borrow') document.getElementById('typeBorrow').classList.add('active');
     }
 
-    // Quick Fill Chips
+    // Quick Preset Chips
     function quickFill(amt, desc, cat) {
       document.getElementById('txAmount').value = amt;
       document.getElementById('txDesc').value = desc;
@@ -553,7 +500,7 @@
       setType('expense');
     }
 
-    // Voice Input (Speech-to-Text)
+    // Speech-to-Text Recognition
     function startVoiceRecognition() {
       if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
         alert("आपका ब्राउज़र वॉइस इनपुट सपोर्ट नहीं करता।");
@@ -585,7 +532,7 @@
       const category = document.getElementById('txCategory').value;
 
       if(!desc || isNaN(amount) || amount <= 0) {
-        alert("कृपया सही विवरण और रकम भरें!");
+        alert("कृपया सही विवरण और रकम दर्ज करें!");
         return;
       }
 
@@ -604,7 +551,7 @@
       
       playCoinSound();
       if(window.confetti) {
-        confetti({ particleCount: 60, spread: 70, origin: { y: 0.8 }, colors: ['#ffd700', '#ffffff'] });
+        confetti({ particleCount: 70, spread: 80, origin: { y: 0.8 }, colors: ['#ffd700', '#ffffff', '#2ed573'] });
       }
 
       document.getElementById('txDesc').value = '';
@@ -648,7 +595,7 @@
       });
 
       if(filtered.length === 0) {
-        listEl.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:15px; font-size:13px;">कोई रिकॉर्ड नहीं मिला।</div>';
+        listEl.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:18px; font-size:13px;">कोई रिकॉर्ड नहीं मिला।</div>';
         return;
       }
 
@@ -660,16 +607,16 @@
         item.className = `tx-item ${t.type} ${t.settled ? 'tx-settled' : ''}`;
         item.innerHTML = `
           <div>
-            <strong style="color:#fff; font-size:13px;">${t.desc}</strong> <small style="color:var(--accent-gold); font-size:10px;">${badge}</small><br>
+            <strong style="color:#fff; font-size:14px;">${t.desc}</strong> <small style="color:var(--accent-gold); font-size:10px;">${badge}</small><br>
             <span style="font-size:11px; color:var(--text-sub);">${t.category} • ${new Date(t.date).toLocaleDateString('hi-IN')}</span>
           </div>
           <div style="text-align:right;">
-            <div style="font-weight:bold; font-size:14px; color:${t.type === 'income' ? 'var(--green-glow)' : 'var(--red-glow)'}">
+            <div style="font-weight:bold; font-size:15px; color:${t.type === 'income' ? 'var(--green-glow)' : 'var(--red-glow)'}">
               ${prefix}₹${t.amount.toFixed(2)}
             </div>
             ${(t.type === 'lend' || t.type === 'borrow') ? 
-              `<button onclick="toggleSettle(${t.id})" style="font-size:10px; padding:2px 6px; cursor:pointer; background:#222; color:#fff; border:1px solid #555; border-radius:4px;">${t.settled ? 'चुकता ✓' : 'चुकाएं'}</button>` : ''}
-            <i class="fa-solid fa-trash" onclick="deleteTx(${t.id})" style="color:#777; font-size:12px; margin-left:8px; cursor:pointer;"></i>
+              `<button onclick="toggleSettle(${t.id})" style="font-size:10px; padding:3px 8px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #475569; border-radius:6px; margin-top:4px;">${t.settled ? 'चुका दिया ✓' : 'चुकाएं'}</button>` : ''}
+            <i class="fa-solid fa-trash" onclick="deleteTx(${t.id})" style="color:#64748b; font-size:13px; margin-left:10px; cursor:pointer;"></i>
           </div>
         `;
         listEl.appendChild(item);
@@ -680,12 +627,12 @@
       const price = parseFloat(document.getElementById('impulsePrice').value);
       const res = document.getElementById('impulseResult');
       if(isNaN(price) || price <= 0) {
-        res.innerHTML = "सही कीमत दर्ज करें।";
+        res.innerHTML = "कृपया सही रकम दर्ज करें।";
         return;
       }
       const pct = ((price / monthlyBudget) * 100).toFixed(1);
-      let advice = pct > 10 ? "⚠️ यह आपकी मासिक बजट सीमा का बड़ा हिस्सा है!" : "✅ यह आपकी बजट सीमा में है।";
-      res.innerHTML = `यह आपके ₹${monthlyBudget} के बजट का <strong>${pct}%</strong> है। <br>${advice}`;
+      let advice = pct > 10 ? "⚠️ यह आपके बजट का बड़ा हिस्सा है, सोच-समझकर खरीदें!" : "✅ यह आपकी सामान्य बजट सीमा में है।";
+      res.innerHTML = `यह आपके ₹${monthlyBudget} बजट का <strong>${pct}%</strong> हिस्सा है। <br>${advice}`;
     }
 
     function renderChart() {
@@ -706,12 +653,12 @@
           labels: labels,
           datasets: [{
             data: data,
-            backgroundColor: ['#ff4757', '#1e90ff', '#ffa500', '#2ed573', '#a55eea', '#00d2d3', '#fffa65']
+            backgroundColor: ['#ef4444', '#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#06b6d4', '#eab308']
           }]
         },
         options: {
           responsive: true,
-          plugins: { legend: { labels: { color: '#ffffff', font: { size: 10 } } } }
+          plugins: { legend: { labels: { color: '#ffffff', font: { size: 11 } } } }
         }
       });
     }
@@ -769,7 +716,7 @@
 
       if(predictedExpense > totalIncome && totalIncome > 0) {
         alertBanner.style.display = 'block';
-        document.getElementById('alertText').innerText = `चेतावनी! इस रफ्तार से आपकी सैलरी महीने के अंत से पहले समाप्त हो सकती है।`;
+        document.getElementById('alertText').innerText = `चेतावनी! इस गति से आपका पूरा बजट महीने के अंत से पहले खत्म हो सकता है।`;
       } else {
         alertBanner.style.display = 'none';
       }
@@ -792,12 +739,43 @@
       renderHeatmap();
     }
 
+    // PDF Export Tool
+    function exportPDF() {
+      const element = document.getElementById('printableArea');
+      const opt = {
+        margin:       0.3,
+        filename:     `Laxmi_Hisab_Report_${Date.now()}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, background: '#080a0f' },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+
+    // Excel Export Tool (SheetJS)
+    function exportExcel() {
+      const excelData = transactions.map(t => ({
+        "दिनांक": new Date(t.date).toLocaleDateString('hi-IN'),
+        "विवरण": t.desc,
+        "रकम (₹)": t.amount,
+        "प्रकार": t.type,
+        "श्रेणी": t.category,
+        "स्थिति": t.settled ? "चुकता" : "बाकी"
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "लक्ष्मी हिसाब");
+      XLSX.writeFile(workbook, `Laxmi_Hisab_${Date.now()}.xlsx`);
+    }
+
+    // WhatsApp Share Tool
     function shareWhatsApp() {
       let text = "✨ *लक्ष्मी हिसाब-किताब रिपोर्ट* ✨\n\n";
       let totalExp = transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+b.amount,0);
       let totalInc = transactions.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0);
       
-      text += `💰 कुल आय: ₹${totalInc}\n💸 कुल खर्च: ₹${totalExp}\n⚖️ शुद्ध बैलेंस: ₹${totalInc - totalExp}\n\n*हालिया लेन-देन:* \n`;
+      text += `💰 कुल आय: ₹${totalInc}\n💸 कुल खर्च: ₹${totalExp}\n⚖️ शुद्ध बचत: ₹${totalInc - totalExp}\n\n*हालिया लेन-देन:* \n`;
       transactions.slice(0, 5).forEach(t => {
         text += `• ${t.desc}: ₹${t.amount} (${t.category})\n`;
       });
@@ -805,18 +783,7 @@
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
     }
 
-    function downloadCSV() {
-      let csv = "Date,Description,Amount,Type,Category,Settled\n";
-      transactions.forEach(t => {
-        csv += `"${new Date(t.date).toLocaleDateString()}"|"${t.desc}"|"${t.amount}"|"${t.type}"|"${t.category}"|"${t.settled}"\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `Laxmi_Hisab_${Date.now()}.csv`;
-      a.click();
-    }
-
+    // JSON Backup / Restore
     function exportJSON() {
       const blob = new Blob([JSON.stringify(transactions, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
@@ -844,3 +811,4 @@
   </script>
 </body>
 </html>
+      
