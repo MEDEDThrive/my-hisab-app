@@ -1,814 +1,600 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>लक्ष्मी हिसाब-किताब (Laxmi Hisab-Kitab - Ultimate Animation Edition)</title>
-
-  <!-- External Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <style>
-    :root {
-      --bg-gradient: linear-gradient(135deg, #080a0f 0%, #121824 50%, #080a0f 100%);
-      --card-bg: rgba(22, 28, 42, 0.65);
-      --card-border: rgba(255, 215, 0, 0.25);
-      --accent-gold: #ffd700;
-      --accent-gold-glow: rgba(255, 215, 0, 0.5);
-      --text-main: #ffffff;
-      --text-sub: #94a3b8;
-      --green-glow: #10b981;
-      --red-glow: #ef4444;
-      --blue-glow: #3b82f6;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    
-    body {
-      background: var(--bg-gradient);
-      color: var(--text-main);
-      min-height: 100vh;
-      padding-bottom: 70px;
-      overflow-x: hidden;
-    }
-
-    /* Dynamic Background Water Animation */
-    .bg-animation {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      pointer-events: none; z-index: -1; overflow: hidden;
-    }
-
-    .bubble {
-      position: absolute; border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, rgba(255,215,0,0.15), rgba(255,215,0,0.01));
-      border: 1px solid rgba(255,215,0,0.15);
-      animation: floatUp 12s infinite linear;
-    }
-
-    @keyframes floatUp {
-      0% { transform: translateY(105vh) scale(0.5); opacity: 0; }
-      20% { opacity: 0.8; }
-      80% { opacity: 0.8; }
-      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
-    }
-
-    /* Water-Drop Lock Screen */
-    #pinOverlay {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: radial-gradient(circle at center, rgba(18, 24, 38, 0.98) 0%, rgba(8, 10, 15, 0.99) 100%);
-      z-index: 10000;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      backdrop-filter: blur(25px);
-      animation: fadeIn 0.5s ease-out;
-    }
-
-    .drop-lock-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 215, 0, 0.3);
-      border-radius: 35px;
-      padding: 35px 25px;
-      text-align: center;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 30px rgba(255, 215, 0, 0.15);
-      width: 90%; max-width: 360px;
-      position: relative; animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .water-drop-icon {
-      width: 80px; height: 80px;
-      margin: 0 auto 20px;
-      background: radial-gradient(circle at 35% 35%, #ffe600, #b8860b);
-      border-radius: 50% 50% 50% 0;
-      transform: rotate(-45deg);
-      box-shadow: 0 12px 30px rgba(255, 215, 0, 0.4), inset -4px -4px 10px rgba(0,0,0,0.5);
-      display: flex; justify-content: center; align-items: center;
-      animation: dropLiquid 3s ease-in-out infinite alternate;
-    }
-
-    .water-drop-icon i { transform: rotate(45deg); font-size: 30px; color: #000; }
-
-    @keyframes dropLiquid {
-      0% { transform: rotate(-45deg) translateY(0px) scale(1); border-radius: 50% 50% 50% 0; }
-      50% { transform: rotate(-45deg) translateY(-10px) scale(1.05); border-radius: 45% 55% 45% 10%; }
-      100% { transform: rotate(-45deg) translateY(0px) scale(1); border-radius: 50% 50% 50% 0; }
-    }
-
-    .pin-title { font-size: 22px; font-weight: 700; color: var(--accent-gold); letter-spacing: 0.5px; }
-    .pin-subtitle { font-size: 13px; color: var(--text-sub); margin-top: 4px; margin-bottom: 22px; }
-
-    .pin-dots { display: flex; justify-content: center; gap: 16px; margin-bottom: 28px; }
-    .pin-dot {
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      border: 2px solid var(--accent-gold);
-      background: rgba(255,215,0,0.05);
-      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .pin-dot.filled {
-      background: radial-gradient(circle at 30% 30%, #ffffff, var(--accent-gold));
-      box-shadow: 0 0 15px var(--accent-gold);
-      transform: scale(1.2);
-    }   
-    .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; justify-items: center; }
-    .key-btn {
-      width: 68px; height: 68px; border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,215,0,0.25);
-      color: #fff; font-size: 24px; font-weight: 600;
-      display: flex; justify-content: center; align-items: center;
-      cursor: pointer; position: relative; overflow: hidden;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 2px 6px rgba(255,255,255,0.3);
-      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .key-btn:active {
-      transform: scale(0.88);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.7), inset 0 0 15px var(--accent-gold);
-    }
-
-    /* Water Ripple Effect */
-    .water-ripple {
-      position: absolute; border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,215,0,0.8) 0%, rgba(255,215,0,0) 70%);
-      transform: scale(0); animation: rippleAnim 0.5s ease-out;
-      pointer-events: none;
-    }
-    @keyframes rippleAnim {
-      to { transform: scale(3.5); opacity: 0; }
-    }
-
-    /* Layout & Header */
-    header {
-      background: rgba(18, 24, 38, 0.85);
-      backdrop-filter: blur(20px);
-      padding: 18px 20px;
-      text-align: center;
-      border-bottom: 1px solid var(--card-border);
-      position: sticky; top: 0; z-index: 100;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    }
-
-    .app-title {
-      font-size: 22px; font-weight: 800;
-      background: linear-gradient(135deg, #ffe600, #ffaa00);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      letter-spacing: 0.5px;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-    }
-
-    .container { max-width: 550px; margin: auto; padding: 18px; }
-
-    /* Animated Cards */
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(15px);
-      border: 1px solid var(--card-border);
-      border-radius: 24px;
-      padding: 20px; margin-bottom: 18px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      transition: transform 0.3s ease, border-color 0.3s ease;
-    }
-
-    .card:hover { border-color: rgba(255,215,0,0.45); }
-
-    .balance-card {
-      text-align: center;
-      background: linear-gradient(145deg, rgba(255,215,0,0.12), rgba(18,24,38,0.8));
-      border: 1px solid var(--accent-gold);
-      position: relative; overflow: hidden;
-    }
-
-    .balance-card::before {
-      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-      background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 60%);
-      animation: rotateGlow 10s linear infinite; pointer-events: none;
-    }
-
-    @keyframes rotateGlow { 100% { transform: rotate(360deg); } }
-
-    .eye-btn {
-      position: absolute; top: 18px; right: 18px;
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-      color: var(--accent-gold); border-radius: 50%; width: 40px; height: 40px;
-      cursor: pointer; transition: all 0.2s; z-index: 2;
-      display: flex; justify-content: center; align-items: center;
-    }
-    .eye-btn:hover { transform: scale(1.1); background: rgba(255,215,0,0.2); }
-
-    .balance-title { font-size: 12px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; z-index: 2; position: relative; }
-    .balance-amount {
-      font-size: 38px; font-weight: 800; color: var(--accent-gold);
-      margin: 8px 0; text-shadow: 0 0 25px var(--accent-gold-glow);
-      z-index: 2; position: relative; transition: all 0.3s;
-    }
-
-    .smart-barometer {
-      display: flex; justify-content: space-between; background: rgba(0,0,0,0.45);
-      padding: 12px 16px; border-radius: 14px; margin-top: 14px; font-size: 13px;
-      border: 1px solid rgba(255,255,255,0.08); z-index: 2; position: relative;
-    }
-
-    .alert-banner {
-      background: rgba(239, 68, 68, 0.2); border: 1px solid var(--red-glow);
-      color: #fca5a5; padding: 12px; border-radius: 14px; margin-bottom: 18px;
-      font-size: 13px; display: none; text-align: center; animation: pulseAlert 2s infinite;
-    }
-    @keyframes pulseAlert { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-
-    /* Quick Chips */
-    .chips-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 14px; }
-    .chip {
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-      padding: 9px 16px; border-radius: 25px; font-size: 12px; white-space: nowrap;
-      cursor: pointer; transition: all 0.25s; color: var(--text-main);
-    }
-    .chip:hover { border-color: var(--accent-gold); background: rgba(255,215,0,0.15); transform: translateY(-2px); }
-
-    /* Form Controls */
-    .form-group { margin-bottom: 14px; }
-    label { font-size: 11px; color: var(--text-sub); text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 0.5px; }
-    input, select {
-      width: 100%; padding: 14px; border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.15); background: rgba(10, 14, 22, 0.6);
-      color: #fff; font-size: 14px; outline: none; transition: 0.25s;
-    }
-    input:focus, select:focus { border-color: var(--accent-gold); box-shadow: 0 0 15px var(--accent-gold-glow); }
-
-    .input-row { display: flex; gap: 10px; }
-
-    .mic-btn {
-      background: rgba(255, 215, 0, 0.12); color: var(--accent-gold);
-      border: 1px solid var(--accent-gold); width: 50px; border-radius: 12px;
-      cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px;
-      transition: all 0.2s;
-    }
-    .mic-btn.recording { background: var(--red-glow); color: #fff; border-color: var(--red-glow); animation: pulseMic 1s infinite; }
-    @keyframes pulseMic { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-
-    .btn {
-      width: 100%; padding: 15px; border: none; border-radius: 14px;
-      font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.25s;
-      display: flex; justify-content: center; align-items: center; gap: 8px;
-    }
-    .btn-gold {
-      background: linear-gradient(135deg, #ffe600, #ffaa00);
-      color: #000; box-shadow: 0 6px 20px rgba(255,215,0,0.35);
-    }
-    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,215,0,0.5); }
-    .btn-gold:active { transform: translateY(0); }
-
-    .btn-outline { background: transparent; border: 1px solid var(--accent-gold); color: var(--accent-gold); }
-    .btn-outline:hover { background: rgba(255,215,0,0.1); }
-
-    /* Type Switcher */
-    .type-selector { display: flex; gap: 8px; margin-bottom: 14px; }
-    .type-btn {
-      flex: 1; padding: 12px 6px; text-align: center; border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px; font-size: 12px; cursor: pointer; background: rgba(0,0,0,0.4); color: var(--text-sub);
-      transition: all 0.25s;
-    }
-    .type-btn.active { border-color: var(--accent-gold); background: rgba(255,215,0,0.18); color: var(--accent-gold); font-weight: bold; }
-
-    /* Heatmap Grid */
-    .heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 12px; }
-    .heatmap-day { padding: 10px 2px; border-radius: 8px; font-size: 11px; text-align: center; background: rgba(255,255,255,0.03); transition: transform 0.2s; }
-    .heatmap-day:hover { transform: scale(1.1); }
-    .heat-low { background: rgba(16, 185, 129, 0.25); border: 1px solid #10b981; }
-    .heat-mid { background: rgba(245, 158, 11, 0.25); border: 1px solid #f59e0b; }
-    .heat-high { background: rgba(239, 68, 68, 0.25); border: 1px solid #ef4444; }
-
-    /* Transaction List Items */
-    .tx-item {
-      display: flex; justify-content: space-between; align-items: center;
-      background: rgba(10, 14, 22, 0.5); padding: 14px 16px; border-radius: 14px;
-      margin-bottom: 10px; border-left: 4px solid var(--accent-gold);
-      animation: fadeIn 0.4s ease-out; transition: all 0.2s;
-    }
-    .tx-item:hover { transform: translateX(3px); background: rgba(10, 14, 22, 0.8); }
-    .tx-item.income { border-left-color: var(--green-glow); }
-    .tx-item.expense { border-left-color: var(--red-glow); }
-    .tx-item.lend { border-left-color: var(--blue-glow); }
-    .tx-settled { opacity: 0.45; text-decoration: line-through; }
-
-    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes popIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
-  </style>
-</head>
-<body>
-
-  <!-- Floating Water Bubbles Background -->
-  <div class="bg-animation">
-    <div class="bubble" style="width:80px; height:80px; left:10%; animation-duration:10s;"></div>
-    <div class="bubble" style="width:40px; height:40px; left:30%; animation-duration:14s; animation-delay:2s;"></div>
-    <div class="bubble" style="width:60px; height:60px; left:65%; animation-duration:11s; animation-delay:1s;"></div>
-    <div class="bubble" style="width:100px; height:100px; left:85%; animation-duration:16s; animation-delay:3s;"></div>
-  </div>
-
-  <!-- Water-Drop Aesthetic PIN Lock Screen -->
-  <div id="pinOverlay">
-    <div class="drop-lock-card">
-      <div class="water-drop-icon">
-
-            <!-- Animated Expense Pie Chart -->
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:12px; font-size:15px;"><i class="fa-solid fa-chart-pie"></i> खर्च का विश्लेषक (Pie Chart)</div>
-      <canvas id="categoryChart" style="max-height: 220px;"></canvas>
-    </div>
-
-    <!-- Heatmap Calendar -->
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:8px; font-size:15px;"><i class="fa-solid fa-calendar-days"></i> माह का हीटमैप कैलेंडर</div>
-      <div class="heatmap-grid" id="heatmapGrid"></div>
-    </div>
-
-    <!-- Impulse Calculator -->
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:8px; color:var(--accent-gold); font-size:15px;"><i class="fa-solid fa-lightbulb"></i> सोच-समझकर खरीदें (Impulse Tool)</div>
-      <div class="input-row">
-        <input type="number" id="impulsePrice" placeholder="कीमत दर्ज करें ₹">
-        <button class="btn btn-outline" style="width: auto; padding:0 22px;" onclick="calcImpulse()">जाँचें</button>
-      </div>
-      <div id="impulseResult" style="font-size:12px; margin-top:10px; color:var(--text-sub);"></div>
-    </div>
-
-    <!-- History List -->
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:12px; font-size:15px;"><i class="fa-solid fa-list-check"></i> लेन-देन का इतिहास</div>
-      <div class="input-row" style="margin-bottom:14px;">
-        <input type="text" id="searchInput" placeholder="खोजें (नाम, आइटम...)" onkeyup="renderTransactions()" style="flex:2;">
-        <select id="filterMonth" onchange="renderTransactions()" style="flex:1;">
-          <option value="ALL">सभी महीने</option>
-        </select>
-      </div>
-
-      <div id="txList"></div>
-    </div>
-
-    <!-- Export & Share Tools (Excel, PDF, WhatsApp) -->
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:12px; font-size:15px;"><i class="fa-solid fa-file-export"></i> एक्सपोर्ट व रिपोर्ट टूल्स</div>
-      <div class="action-grid">
-        <button class="btn btn-outline" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> PDF रिपोर्ट</button>
-        <button class="btn btn-outline" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Excel शीट</button>
-        <button class="btn btn-outline" onclick="shareWhatsApp()"><i class="fa-brands fa-whatsapp"></i> WhatsApp शेयर</button>
-        <button class="btn btn-outline" onclick="exportJSON()"><i class="fa-solid fa-download"></i> बैकअप (JSON)</button>
-        <button class="btn btn-outline" style="grid-column: span 2;" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> पुराना बैकअप रीस्टोर करें</button>
-        <input type="file" id="importFile" style="display:none" onchange="importJSON(event)">
-      </div>
-    </div>
-
-  </div>
-
-  <script>
-    // State Management
-    let transactions = JSON.parse(localStorage.getItem('laxmi_txs')) || [];
-    let currentType = 'expense';
-    let isHidden = false;
-    let myChart = null;
-    let enteredPin = "";
-    let userPIN = localStorage.getItem('laxmi_pin') || '1234';
-    let monthlyBudget = 10000;
-
-    // Web Audio Synthesizers (Water Drop Sound)
-    function playWaterDropSound() {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(450, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1250, audioCtx.currentTime + 0.04);
-        osc.frequency.exponentialRampToValueAtTime(350, audioCtx.currentTime + 0.16);
-
-        gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.16);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.16);
-      } catch(e) {}
-    }
-
-    function playCoinSound() {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(987.77, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1318.51, audioCtx.currentTime + 0.08);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.25);
-      } catch(e) {}
-    }
-
-    // Ripple Effect Logic
-    function createRipple(e) {
-      const btn = e.currentTarget;
-      const circle = document.createElement("span");
-      const diameter = Math.max(btn.clientWidth, btn.clientHeight);
-      circle.style.width = circle.style.height = `${diameter}px`;
-      circle.style.left = `${e.clientX - btn.getBoundingClientRect().left - diameter / 2}px`;
-      circle.style.top = `${e.clientY - btn.getBoundingClientRect().top - diameter / 2}px`;
-      circle.classList.add("water-ripple");
-      
-      const existingRipple = btn.getElementsByClassName("water-ripple")[0];
-      if (existingRipple) existingRipple.remove();
-      btn.appendChild(circle);
-    }
-
-    // Keypad Logic
-    function pressKey(num, e) {
-      if(e) createRipple(e);
-      playWaterDropSound();
-      if(enteredPin.length < 4) {
-        enteredPin += num;
-        updatePinDots();
-      }
-      if(enteredPin.length === 4) {
-        setTimeout(verifyPin, 150);
-      }
-    }
-
-    function deleteDigit(e) {
-      if(e) createRipple(e);
-      playWaterDropSound();
-      enteredPin = enteredPin.slice(0, -1);
-      updatePinDots();
-    }
-
-    function clearPin(e) {
-      if(e) createRipple(e);
-      playWaterDropSound();
-      enteredPin = "";
-      updatePinDots();
-    }
-
-    function updatePinDots() {
-      for(let i = 1; i <= 4; i++) {
-        const dot = document.getElementById(`dot-${i}`);
-        if(i <= enteredPin.length) dot.classList.add('filled');
-        else dot.classList.remove('filled');
-      }
-    }
-        function verifyPin() {
-      if(enteredPin === userPIN) {
-        document.getElementById('pinOverlay').style.display = 'none';
-      } else {
-        alert("गलत PIN! सही PIN डालें (Default PIN: 1234)");
-        enteredPin = "";
-        updatePinDots();
-      }
-    }
-
-    // Eye Toggle
-    function toggleEye() {
-      isHidden = !isHidden;
-      document.getElementById('eyeIcon').className = isHidden ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
-      updateUI();
-    }
-
-    // Set Type
-    function setType(type) {
-      currentType = type;
-      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-      if(type === 'expense') document.getElementById('typeExpense').classList.add('active');
-      if(type === 'income') document.getElementById('typeIncome').classList.add('active');
-      if(type === 'lend') document.getElementById('typeLend').classList.add('active');
-      if(type === 'borrow') document.getElementById('typeBorrow').classList.add('active');
-    }
-
-    // Quick Preset Chips
-    function quickFill(amt, desc, cat) {
-      document.getElementById('txAmount').value = amt;
-      document.getElementById('txDesc').value = desc;
-      document.getElementById('txCategory').value = cat;
-      setType('expense');
-    }
-
-    // Speech-to-Text Recognition
-    function startVoiceRecognition() {
-      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert("आपका ब्राउज़र वॉइस इनपुट सपोर्ट नहीं करता।");
-        return;
-      }
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'hi-IN';
-      const micBtn = document.getElementById('micBtn');
-
-      recognition.onstart = function() { micBtn.classList.add('recording'); };
-      recognition.onend = function() { micBtn.classList.remove('recording'); };
-
-      recognition.onresult = function(event) {
-        const text = event.results[0][0].transcript;
-        document.getElementById('txDesc').value = text;
-        const numbers = text.match(/\d+/g);
-        if (numbers && numbers.length > 0) {
-          document.getElementById('txAmount').value = numbers[0];
-        }
-      };
-      recognition.start();
-    }
-
-    // Add Transaction
-    function addTransaction() {
-      const desc = document.getElementById('txDesc').value.trim();
-      const amount = parseFloat(document.getElementById('txAmount').value);
-      const category = document.getElementById('txCategory').value;
-
-      if(!desc || isNaN(amount) || amount <= 0) {
-        alert("कृपया सही विवरण और रकम दर्ज करें!");
-        return;
-      }
-
-      const newTx = {
-        id: Date.now(),
-        desc: desc,
-        amount: amount,
-        category: category,
-        type: currentType,
-        settled: false,
-        date: new Date().toISOString()
-      };
-
-      transactions.unshift(newTx);
-      saveData();
-      
-      playCoinSound();
-      if(window.confetti) {
-        confetti({ particleCount: 70, spread: 80, origin: { y: 0.8 }, colors: ['#ffd700', '#ffffff', '#2ed573'] });
-      }
-
-      document.getElementById('txDesc').value = '';
-      document.getElementById('txAmount').value = '';
-      updateUI();
-    }
-
-    function toggleSettle(id) {
-      transactions = transactions.map(t => {
-        if(t.id === id) t.settled = !t.settled;
-        return t;
-      });
-      saveData();
-      updateUI();
-    }
-
-    function deleteTx(id) {
-      if(confirm("क्या आप इस एंट्री को हटाना चाहते हैं?")) {
-        transactions = transactions.filter(t => t.id !== id);
-        saveData();
-        updateUI();
-      }
-    }
-
-    function saveData() {
-      localStorage.setItem('laxmi_txs', JSON.stringify(transactions));
-    }
-
-    function renderTransactions() {
-      const listEl = document.getElementById('txList');
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const monthFilter = document.getElementById('filterMonth').value;
-
-      listEl.innerHTML = '';
-
-      const filtered = transactions.filter(t => {
-        const matchesSearch = t.desc.toLowerCase().includes(search) || t.category.toLowerCase().includes(search);
-        const tMonth = new Date(t.date).getMonth() + "-" + new Date(t.date).getFullYear();
-        const matchesMonth = (monthFilter === 'ALL' || tMonth === monthFilter);
-        return matchesSearch && matchesMonth;
-      });
-
-      if(filtered.length === 0) {
-        listEl.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:18px; font-size:13px;">कोई रिकॉर्ड नहीं मिला।</div>';
-        return;
-      }
-
-      filtered.forEach(t => {
-        const item = document.createElement('div');
-        let prefix = t.type === 'income' ? '+' : '-';
-        let badge = t.type === 'lend' ? ' (उधार दिया)' : (t.type === 'borrow' ? ' (उधार लिया)' : '');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>श्री लक्ष्मी कुबेर - सुपर एडवांस हिसाब-किताब</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js for Visual Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
         
-        item.className = `tx-item ${t.type} ${t.settled ? 'tx-settled' : ''}`;
-        item.innerHTML = `
-          <div>
-            <strong style="color:#fff; font-size:14px;">${t.desc}</strong> <small style="color:var(--accent-gold); font-size:10px;">${badge}</small><br>
-            <span style="font-size:11px; color:var(--text-sub);">${t.category} • ${new Date(t.date).toLocaleDateString('hi-IN')}</span>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-weight:bold; font-size:15px; color:${t.type === 'income' ? 'var(--green-glow)' : 'var(--red-glow)'}">
-              ${prefix}₹${t.amount.toFixed(2)}
+        body {
+            background: #070a12;
+            font-family: 'Poppins', sans-serif;
+            color: #f1f5f9;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gold-border-glow {
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.15);
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 35px rgba(245, 158, 11, 0.8)); }
+        }
+
+        .laxmi-glow {
+            animation: pulseGlow 2.5s infinite ease-in-out;
+        }
+
+        .quick-chip {
+            transition: all 0.2s ease;
+        }
+        .quick-chip:active {
+            transform: scale(0.92);
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-16 flex flex-col items-center justify-start p-3 select-none">
+
+    <!-- 1. LAXMI MATA SPLASH SCREEN -->
+    <div id="splashScreen" onclick="closeSplash()" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700 cursor-pointer">
+        <div class="relative flex flex-col items-center">
+            <div class="w-48 h-48 rounded-full bg-gradient-to-tr from-amber-600 via-yellow-400 to-amber-200 p-1 laxmi-glow shadow-2xl shadow-amber-500/40 flex items-center justify-center">
+                <div class="w-full h-full bg-slate-950 rounded-full flex flex-col items-center justify-center p-4 text-amber-400">
+                    <span class="text-6xl">🪔</span>
+                    <span class="text-xs font-extrabold tracking-widest text-amber-300 mt-2">|| श्री लक्ष्मी प्रसन्न ||</span>
+                </div>
             </div>
-            ${(t.type === 'lend' || t.type === 'borrow') ? 
-              `<button onclick="toggleSettle(${t.id})" style="font-size:10px; padding:3px 8px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #475569; border-radius:6px; margin-top:4px;">${t.settled ? 'चुका दिया ✓' : 'चुकाएं'}</button>` : ''}
-            <i class="fa-solid fa-trash" onclick="deleteTx(${t.id})" style="color:#64748b; font-size:13px; margin-left:10px; cursor:pointer;"></i>
-          </div>
-        `;
-        listEl.appendChild(item);
-      });
-    }
+            
+            <h1 class="text-3xl font-extrabold gold-gradient-text mt-6 tracking-wide">
+                लक्ष्मी कुबेर हिसाब
+            </h1>
+            <p class="text-amber-200/80 text-xs mt-2 font-medium">100% सुरक्षित • आपका पर्सनल एस्थेटिक वॉलेट</p>
+            
+            <div class="mt-8 px-5 py-2.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs animate-bounce font-semibold flex items-center gap-2">
+                ⚡ टच करके ऐप खोलें
+            </div>
+        </div>
+    </div>
 
-    function calcImpulse() {
-      const price = parseFloat(document.getElementById('impulsePrice').value);
-      const res = document.getElementById('impulseResult');
-      if(isNaN(price) || price <= 0) {
-        res.innerHTML = "कृपया सही रकम दर्ज करें।";
-        return;
-      }
-      const pct = ((price / monthlyBudget) * 100).toFixed(1);
-      let advice = pct > 10 ? "⚠️ यह आपके बजट का बड़ा हिस्सा है, सोच-समझकर खरीदें!" : "✅ यह आपकी सामान्य बजट सीमा में है।";
-      res.innerHTML = `यह आपके ₹${monthlyBudget} बजट का <strong>${pct}%</strong> हिस्सा है। <br>${advice}`;
-    }
+    <!-- MAIN APP CONTAINER -->
+    <div id="mainApp" class="w-full max-w-md space-y-4 mt-1 hidden">
 
-    function renderChart() {
-      const categories = {};
-      transactions.filter(t => t.type === 'expense').forEach(t => {
-        categories[t.category] = (categories[t.category] || 0) + t.amount;
-      });
+        <!-- HEADER -->
+        <header class="flex justify-between items-center px-2 py-1">
+            <div>
+                <h1 class="text-xl font-extrabold gold-gradient-text flex items-center gap-2">
+                    🪔 श्री लक्ष्मी हिसाब
+                </h1>
+                <p class="text-[10px] text-slate-400">बिना किसी थर्ड-पार्टी अकाउंट के 100% प्राइवेट</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="togglePrivacy()" title="बैलेंस छुपाएं/दिखाएं" class="p-2 bg-slate-900 rounded-xl border border-slate-800 text-amber-400 hover:bg-slate-800 transition">
+                    <i id="eyeIcon" data-lucide="eye" class="w-4 h-4"></i>
+                </button>
+                <button onclick="editIncome()" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-300 px-3 py-2 rounded-xl border border-amber-500/30 transition flex items-center gap-1 font-semibold">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> आय बदलें
+                </button>
+            </div>
+        </header>
 
-      const labels = Object.keys(categories);
-      const data = Object.values(categories);
+        <!-- TOP BALANCE & INCOME CARD -->
+        <div class="glass-card gold-border-glow rounded-3xl p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40">
+            <div class="absolute -right-8 -bottom-8 w-36 h-36 bg-amber-500/10 rounded-full blur-3xl"></div>
+            
+            <div class="grid grid-cols-2 gap-3 divide-x divide-slate-800/80">
+                <!-- Total Income -->
+                <div class="pr-2">
+                    <span class="text-[11px] text-slate-400 font-medium block">कुल मासिक आय</span>
+                    <div class="text-lg font-bold text-slate-200" id="displayIncome">₹9,000</div>
+                </div>
+                <!-- Total Spent -->
+                <div class="pl-3">
+                    <span class="text-[11px] text-slate-400 font-medium block">कुल खर्च</span>
+                    <div class="text-lg font-bold text-rose-400" id="displaySpent">₹0</div>
+                </div>
+            </div>
 
-      const ctx = document.getElementById('categoryChart').getContext('2d');
-      if(myChart) myChart.destroy();
+            <hr class="border-slate-800 my-3">
 
-      myChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: ['#ef4444', '#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#06b6d4', '#eab308']
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { labels: { color: '#ffffff', font: { size: 11 } } } }
+            <!-- Remaining Balance -->
+            <div class="flex justify-between items-end">
+                <div>
+                    <span class="text-[10px] text-amber-400/90 font-semibold uppercase tracking-wider block">बचा हुआ बैलेंस (Balance)</span>
+                    <div class="text-3xl font-extrabold text-emerald-400 mt-0.5 tracking-tight" id="displayRemaining">₹9,000</div>
+                </div>
+                <div id="budgetStatusTag" class="bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full text-[10px] font-bold text-emerald-300">
+                    सुरक्षित बजट
+                </div>
+            </div>
+
+            <!-- DAILY BUDGET BAROMETER -->
+            <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-[11px]">
+                <span class="text-slate-400 flex items-center gap-1">
+                    <i data-lucide="zap" class="w-3 h-3 text-amber-400"></i> आज की सेफ़ लिमिट:
+                </span>
+                <span id="dailyLimitText" class="font-bold text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-800/40">₹300 / दिन</span>
+            </div>
+        </div>
+
+        <!-- QUICK 1-TAP CHIPS -->
+        <div class="space-y-1.5">
+            <span class="text-[11px] text-slate-400 font-semibold px-1">⚡ 1-टैप क्विक खर्चे:</span>
+            <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <button onclick="quickAdd('चाय-नाश्ता', 20, '🍔 खाना', 'Cash')" class="quick-chip bg-slate-900 border border-amber-500/30 text-amber-200 text-xs px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-amber-500/20">☕ ₹20 चाय</button>
+                <button onclick="quickAdd('नाश्ता', 50, '🍔 खाना', 'UPI')" class="quick-chip bg-slate-900 border border-amber-500/30 text-amber-200 text-xs px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-amber-500/20">🍔 ₹50 नाश्ता</button>
+                <button onclick="quickAdd('पेट्रोल', 100, '🚌 यात्रा', 'UPI')" class="quick-chip bg-slate-900 border border-amber-500/30 text-amber-200 text-xs px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-amber-500/20">⛽ ₹100 पेट्रोल</button>
+                <button onclick="quickAdd('मोबाइल रीचार्ज', 299, '📱 रीचार्ज', 'UPI')" class="quick-chip bg-slate-900 border border-amber-500/30 text-amber-200 text-xs px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-amber-500/20">📱 ₹299 रीचार्ज</button>
+            </div>
+        </div>
+
+        <!-- ADD EXPENSE FORM -->
+        <form id="expenseForm" class="glass-card rounded-3xl p-4 space-y-3.5 border border-slate-800">
+            <div class="flex justify-between items-center">
+                <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-4 h-4 text-amber-400"></i> नया खर्चा जोड़ें
+                </h2>
+                <label class="flex items-center gap-1.5 text-xs text-amber-300 cursor-pointer bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
+                    <input type="checkbox" id="isUdhaar" class="accent-amber-500 rounded">
+                    <span>🤝 उधार है?</span>
+                </label>
+            </div>
+
+            <!-- Amount Input & Impulse Warning -->
+            <div>
+                <label class="text-[11px] text-slate-400 block mb-1">रकम (Amount ₹)</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-2.5 text-amber-400 font-bold">₹</span>
+                    <input type="number" id="amount" required placeholder="50" oninput="calculateImpulseWarning()"
+                        class="w-full bg-slate-950/90 border border-slate-800 rounded-2xl py-2.5 pl-9 pr-4 text-white font-bold text-lg focus:outline-none focus:border-amber-500 transition">
+                </div>
+                <div id="impulseWarning" class="text-[10px] text-amber-400/80 mt-1 hidden font-medium"></div>
+            </div>
+
+            <!-- Item & Category Selector -->
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[11px] text-slate-400 block mb-1">किस चीज़ पर? (Item)</label>
+                    <input type="text" id="item" required placeholder="जैसे: चाय, राशन" 
+                        class="w-full bg-slate-950/90 border border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-amber-500 transition">
+                </div>
+                <div>
+                    <label class="text-[11px] text-slate-400 block mb-1">केटेगरी (Category)</label>
+                    <select id="category" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl py-2 px-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition">
+                        <option value="🍔 खाना">🍔 खाना-नाश्ता</option>
+                        <option value="🚌 यात्रा">🚌 यात्रा/पेट्रोल</option>
+                        <option value="📱 रीचार्ज">📱 रीचार्ज/बिल</option>
+                        <option value="🏠 किराया">🏠 कमरा किराया</option>
+                        <option value="🛒 राशन">🛒 राशन/सब्जी</option>
+                        <option value="💊 दवाई">💊 सेहत/दवाई</option>
+                        <option value="🛍️ शॉपिंग">🛍️ शॉपिंग</option>
+                        <option value="🤝 उधार">🤝 उधार/लेन-देन</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Person & Payment Mode -->
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[11px] text-slate-400 block mb-1">किसको दिया? (Paid To)</label>
+                    <input type="text" id="paidTo" placeholder="जैसे: शर्मा जी, दोस्त" 
+                        class="w-full bg-slate-950/90 border border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-amber-500 transition">
+                </div>
+                <div>
+                    <label class="text-[11px] text-slate-400 block mb-1">माध्यम (Mode)</label>
+                    <select id="paymentMode" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition">
+                        <option value="UPI">UPI (PhonePe/GPay)</option>
+                        <option value="Cash">Cash (नकद)</option>
+                        <option value="Card">Card</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Location Input + GPS -->
+            <div>
+                <label class="text-[11px] text-slate-400 block mb-1">कहाँ खर्च किया? (Location)</label>
+                <div class="flex gap-2">
+                    <input type="text" id="location" placeholder="जैसे: फ्रीगंज, टावर चौक" 
+                        class="w-full bg-slate-950/90 border border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-amber-500 transition">
+                    <button type="button" onclick="getGPSLocation()" title="GPS से लोकेशन लें"
+                        class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-300 border border-amber-500/40 px-3 rounded-xl transition flex items-center justify-center">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- BIG SHANDAR ACTION BUTTON -->
+            <button type="submit" 
+                class="w-full mt-2 bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-extrabold py-3.5 rounded-2xl transition transform active:scale-95 shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 text-base">
+                <i data-lucide="check-circle-2" class="w-5 h-5"></i> खर्चा सेव करें (Save Expense)
+            </button>
+        </form>
+
+        <!-- ANALYTICS CHART TOGGLE -->
+        <div class="glass-card rounded-2xl p-4 border border-slate-800">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="pie-chart" class="w-4 h-4 text-amber-400"></i> खर्च विश्लेषण (Analytics)
+                </h3>
+                <span class="text-[10px] text-slate-400">श्रेणी अनुसार ग्राफ</span>
+            </div>
+            <div class="h-44 relative flex items-center justify-center">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- SEARCH & HISTORY SECTION -->
+        <section class="space-y-3 pt-1">
+            <div class="flex flex-col gap-2 px-1">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-sm font-bold text-slate-300 flex items-center gap-2">
+                        <i data-lucide="history" class="w-4 h-4 text-amber-400"></i> खर्चों का हिसाब (History)
+                    </h2>
+                    <span id="txCount" class="text-[10px] bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full border border-slate-700">0 एंट्रियां</span>
+                </div>
+                <!-- Search input -->
+                <div class="relative">
+                    <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500"></i>
+                    <input type="text" id="searchInput" onkeyup="renderExpenses()" placeholder="खोजें (स्थान, नाम, चीज़)..." 
+                        class="w-full bg-slate-900 border border-slate-800 rounded-xl py-1.5 pl-8 pr-3 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+
+            <!-- HISTORY LIST -->
+            <div id="expenseList" class="space-y-2">
+                <!-- Data dynamically inserted here -->
+            </div>
+
+            <!-- EXPORT & WHATSAPP BUTTONS -->
+            <div class="grid grid-cols-2 gap-2 pt-2">
+                <button onclick="shareOnWhatsApp()" class="bg-emerald-600/20 border border-emerald-500/40 hover:bg-emerald-600/30 text-emerald-300 text-xs py-2.5 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="share-2" class="w-3.5 h-3.5"></i> WhatsApp पर भेजें
+                </button>
+                <button onclick="exportJSONBackup()" class="bg-indigo-600/20 border border-indigo-500/40 hover:bg-indigo-600/30 text-indigo-300 text-xs py-2.5 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i> डेटा बैकअप (JSON)
+                </button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        let monthlyIncome = parseFloat(localStorage.getItem('hisab_income')) || 9000;
+        let expenses = JSON.parse(localStorage.getItem('hisab_expenses')) || [];
+        let isPrivateMode = false;
+        let myChart = null;
+
+        // Sound effect generator using Web Audio API (Zero external files needed)
+        function playCoinSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(987.77, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1318.51, ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.25);
+            } catch(e){}
         }
-      });
-    }
 
-    function renderHeatmap() {
-      const grid = document.getElementById('heatmapGrid');
-      grid.innerHTML = '';
-      const now = new Date();
-      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        // Auto hide splash screen after 2.5 seconds
+        setTimeout(() => {
+            closeSplash();
+        }, 2500);
 
-      const dailyMap = {};
-      transactions.filter(t => t.type === 'expense').forEach(t => {
-        const d = new Date(t.date);
-        if(d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) {
-          const dayNum = d.getDate();
-          dailyMap[dayNum] = (dailyMap[dayNum] || 0) + t.amount;
+        function closeSplash() {
+            const splash = document.getElementById('splashScreen');
+            const main = document.getElementById('mainApp');
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.classList.add('hidden');
+                main.classList.remove('hidden');
+                lucide.createIcons();
+                updateUI();
+            }, 600);
         }
-      });
 
-      for(let i=1; i<=daysInMonth; i++) {
-        const dayEl = document.createElement('div');
-        const spent = dailyMap[i] || 0;
-        let heatClass = 'heatmap-day';
-        if(spent > 0 && spent <= 200) heatClass += ' heat-low';
-        else if(spent > 200 && spent <= 700) heatClass += ' heat-mid';
-        else if(spent > 700) heatClass += ' heat-high';
+        function calculateImpulseWarning() {
+            const amt = parseFloat(document.getElementById('amount').value);
+            const warnEl = document.getElementById('impulseWarning');
+            if (amt > 0 && monthlyIncome > 0) {
+                const percent = ((amt / monthlyIncome) * 100).toFixed(1);
+                warnEl.classList.remove('hidden');
+                warnEl.innerText = `💡 ध्यान दें: यह आपकी ₹${monthlyIncome} सैलरी का ${percent}% है!`;
+            } else {
+                warnEl.classList.add('hidden');
+            }
+        }
 
-        dayEl.className = heatClass;
-        dayEl.innerHTML = `<strong>${i}</strong><br>₹${spent}`;
-        grid.appendChild(dayEl);
-      }
-    }
+        function togglePrivacy() {
+            isPrivateMode = !isPrivateMode;
+            const eyeIcon = document.getElementById('eyeIcon');
+            eyeIcon.setAttribute('data-lucide', isPrivateMode ? 'eye-off' : 'eye');
+            lucide.createIcons();
+            updateUI();
+        }
 
-    function updateUI() {
-      let totalIncome = 0, totalExpense = 0;
-      transactions.forEach(t => {
-        if(t.type === 'income') totalIncome += t.amount;
-        if(t.type === 'expense') totalExpense += t.amount;
-      });
+        function quickAdd(item, amount, category, mode) {
+            document.getElementById('item').value = item;
+            document.getElementById('amount').value = amount;
+            document.getElementById('category').value = category;
+            document.getElementById('paymentMode').value = mode;
+            calculateImpulseWarning();
+        }
 
-      const netBalance = totalIncome - totalExpense;
-      document.getElementById('balanceDisplay').innerText = isHidden ? '••••••' : `₹${netBalance.toFixed(2)}`;
+        function updateUI() {
+            const list = document.getElementById('expenseList');
+            const displayIncome = document.getElementById('displayIncome');
+            const displaySpent = document.getElementById('displaySpent');
+            const displayRemaining = document.getElementById('displayRemaining');
+            const txCount = document.getElementById('txCount');
+            const dailyLimitText = document.getElementById('dailyLimitText');
+            const budgetStatusTag = document.getElementById('budgetStatusTag');
 
-      const now = new Date();
-      const totalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-      const daysLeft = totalDays - now.getDate() + 1;
-      const safeDailyLimit = netBalance > 0 ? (netBalance / daysLeft) : 0;
+            let totalSpent = 0;
+            const categoryTotals = {};
 
-      document.getElementById('dailyLimitDisplay').innerText = isHidden ? '••' : `₹${safeDailyLimit.toFixed(0)}`;
-      document.getElementById('daysLeftDisplay').innerText = `${daysLeft} दिन`;
+            expenses.forEach(exp => {
+                totalSpent += parseFloat(exp.amount);
+                const cat = exp.category || '🍔 खाना';
+              categoryTotals[cat] = (categoryTotals[cat] || 0) + parseFloat(exp.amount);
+            });
 
-      const alertBanner = document.getElementById('alertBanner');
-      const avgDailySpend = totalExpense / (now.getDate() || 1);
-      const predictedExpense = avgDailySpend * totalDays;
+            const remaining = monthlyIncome - totalSpent;
+            
+            // Daily Limit calculation based on remaining days in month
+            const now = new Date();
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const daysLeft = Math.max(1, daysInMonth - now.getDate() + 1);
+            const dailySafeLimit = Math.max(0, Math.floor(remaining / daysLeft));
 
-      if(predictedExpense > totalIncome && totalIncome > 0) {
-        alertBanner.style.display = 'block';
-        document.getElementById('alertText').innerText = `चेतावनी! इस गति से आपका पूरा बजट महीने के अंत से पहले खत्म हो सकता है।`;
-      } else {
-        alertBanner.style.display = 'none';
-      }
+            dailyLimitText.innerText = `₹${dailySafeLimit} / दिन (${daysLeft} दिन शेष)`;
 
-      const monthSelect = document.getElementById('filterMonth');
-      const months = [...new Set(transactions.map(t => {
-        const d = new Date(t.date);
-        return d.getMonth() + "-" + d.getFullYear();
-      }))];
-      
-      monthSelect.innerHTML = '<option value="ALL">सभी महीने</option>';
-      months.forEach(m => {
-        const option = document.createElement('option');
-        option.value = m; option.innerText = m;
-        monthSelect.appendChild(option);
-      });
+            // Update budget status badge
+            if (remaining < 1000) {
+                budgetStatusTag.className = "bg-rose-500/20 border border-rose-500/40 px-2.5 py-1 rounded-full text-[10px] font-bold text-rose-300 animate-pulse";
+                budgetStatusTag.innerText = "⚠️ बजट समाप्त के करीब";
+            } else if (remaining < 3000) {
+                budgetStatusTag.className = "bg-amber-500/20 border border-amber-500/40 px-2.5 py-1 rounded-full text-[10px] font-bold text-amber-300";
+                budgetStatusTag.innerText = "⚡ सचेत रहें";
+            } else {
+                budgetStatusTag.className = "bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full text-[10px] font-bold text-emerald-300";
+                budgetStatusTag.innerText = "सुरक्षित बजट";
+            }
 
-      renderTransactions();
-      renderChart();
-      renderHeatmap();
-    }
+            if (isPrivateMode) {
+                displayIncome.innerText = '••••••';
+                displaySpent.innerText = '••••••';
+                displayRemaining.innerText = '••••••';
+            } else {
+                displayIncome.innerText = `₹${monthlyIncome.toLocaleString('hi-IN')}`;
+                displaySpent.innerText = `₹${totalSpent.toLocaleString('hi-IN')}`;
+                displayRemaining.innerText = `₹${remaining.toLocaleString('hi-IN')}`;
+            }
 
-    // PDF Export Tool
-    function exportPDF() {
-      const element = document.getElementById('printableArea');
-      const opt = {
-        margin:       0.3,
-        filename:     `Laxmi_Hisab_Report_${Date.now()}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, background: '#080a0f' },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      html2pdf().set(opt).from(element).save();
-    }
+            renderExpenses();
+            updateChart(categoryTotals);
+        }
 
-    // Excel Export Tool (SheetJS)
-    function exportExcel() {
-      const excelData = transactions.map(t => ({
-        "दिनांक": new Date(t.date).toLocaleDateString('hi-IN'),
-        "विवरण": t.desc,
-        "रकम (₹)": t.amount,
-        "प्रकार": t.type,
-        "श्रेणी": t.category,
-        "स्थिति": t.settled ? "चुकता" : "बाकी"
-      }));
+        function renderExpenses() {
+            const list = document.getElementById('expenseList');
+            const searchQuery = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            const txCount = document.getElementById('txCount');
+            list.innerHTML = '';
 
-      const worksheet = XLSX.utils.json_to_sheet(excelData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "लक्ष्मी हिसाब");
-      XLSX.writeFile(workbook, `Laxmi_Hisab_${Date.now()}.xlsx`);
-    }
+            const filteredExpenses = expenses.filter(exp => {
+                return (exp.item || '').toLowerCase().includes(searchQuery) ||
+                       (exp.paidTo || '').toLowerCase().includes(searchQuery) ||
+                       (exp.location || '').toLowerCase().includes(searchQuery) ||
+                       (exp.category || '').toLowerCase().includes(searchQuery);
+            });
 
-    // WhatsApp Share Tool
-    function shareWhatsApp() {
-      let text = "✨ *लक्ष्मी हिसाब-किताब रिपोर्ट* ✨\n\n";
-      let totalExp = transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+b.amount,0);
-      let totalInc = transactions.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0);
-      
-      text += `💰 कुल आय: ₹${totalInc}\n💸 कुल खर्च: ₹${totalExp}\n⚖️ शुद्ध बचत: ₹${totalInc - totalExp}\n\n*हालिया लेन-देन:* \n`;
-      transactions.slice(0, 5).forEach(t => {
-        text += `• ${t.desc}: ₹${t.amount} (${t.category})\n`;
-      });
+            txCount.innerText = `${filteredExpenses.length} एंट्रियां`;
 
-      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
-    }
+            if (filteredExpenses.length === 0) {
+                list.innerHTML = `<div class="glass-card rounded-2xl p-6 text-center text-slate-500 text-xs">कोई खर्चा नहीं मिला।</div>`;
+                return;
+            }
 
-    // JSON Backup / Restore
-    function exportJSON() {
-      const blob = new Blob([JSON.stringify(transactions, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `Laxmi_Backup_${Date.now()}.json`;
-      a.click();
-    }
+            filteredExpenses.slice().reverse().forEach((exp, index) => {
+                const actualIndex = expenses.indexOf(exp);
+                const card = document.createElement('div');
+                const isUdhaar = exp.isUdhaar;
 
-    function importJSON(event) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          transactions = JSON.parse(e.target.result);
-          saveData();
-          updateUI();
-          alert("डेटा सफलतापूर्वक रीस्टोर हो गया!");
-        } catch(err) { alert("गलत बैकअप फ़ाइल!"); }
-      };
-      reader.readAsText(event.target.files[0]);
-    }
+                card.className = `glass-card rounded-2xl p-3.5 flex justify-between items-center border ${isUdhaar ? 'border-amber-500/50 bg-amber-950/20' : 'border-slate-800/80'} hover:border-amber-500/30 transition`;
+                
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-slate-100 text-sm">${exp.item}</span>
+                            <span class="text-[9px] font-bold bg-amber-500/10 text-amber-300 px-2 py-0.5 rounded-md border border-amber-500/20">${exp.category || 'खर्चा'}</span>
+                            ${isUdhaar ? `<span class="text-[9px] font-bold bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded">उधार</span>` : ''}
+                        </div>
+                        <div class="text-[11px] text-slate-400 flex flex-wrap gap-x-3 gap-y-0.5">
+                            ${exp.paidTo ? `<span>👤 ${exp.paidTo}</span>` : ''}
+                            ${exp.location ? `<span>📍 ${exp.location}</span>` : ''}
+                            <span class="text-[9px] text-indigo-300 bg-indigo-950 px-1.5 py-0.2 rounded">${exp.mode}</span>
+                        </div>
+                        <div class="text-[9px] text-slate-500">${exp.dateTime}</div>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <span class="font-extrabold ${isUdhaar ? 'text-amber-400' : 'text-rose-400'} text-base">
+                            ${isPrivateMode ? '••••' : `-₹${parseFloat(exp.amount).toFixed(0)}`}
+                        </span>
+                        <button onclick="deleteExpense(${actualIndex})" class="text-slate-600 hover:text-rose-400 transition p-1">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
 
-    window.onload = function() {
-      updateUI();
-    };
-  </script>
+            lucide.createIcons();
+        }
+
+        document.getElementById('expenseForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString('hi-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            const formattedTime = now.toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            const newExp = {
+                amount: document.getElementById('amount').value,
+                item: document.getElementById('item').value,
+                category: document.getElementById('category').value,
+                paidTo: document.getElementById('paidTo').value,
+                location: document.getElementById('location').value,
+                mode: document.getElementById('paymentMode').value,
+                isUdhaar: document.getElementById('isUdhaar').checked,
+                dateTime: `${formattedDate}, ${formattedTime}`
+            };
+
+            expenses.push(newExp);
+            localStorage.setItem('hisab_expenses', JSON.stringify(expenses));
+            
+            // Sound and Confetti Effect
+            playCoinSound();
+            confetti({
+                particleCount: 40,
+                spread: 60,
+                origin: { y: 0.8 },
+                colors: ['#f59e0b', '#fbbf24', '#10b981']
+            });
+
+            document.getElementById('expenseForm').reset();
+            document.getElementById('impulseWarning').classList.add('hidden');
+            updateUI();
+        });
+
+        function deleteExpense(index) {
+            if (confirm('क्या आप इस एंट्री को हटाना चाहते हैं?')) {
+                expenses.splice(index, 1);
+                localStorage.setItem('hisab_expenses', JSON.stringify(expenses));
+                updateUI();
+            }
+        }
+
+        function editIncome() {
+            const newIncome = prompt('अपनी मंथली इनकम (₹) दर्ज करें:', monthlyIncome);
+            if (newIncome && !isNaN(newIncome)) {
+                monthlyIncome = parseFloat(newIncome);
+                localStorage.setItem('hisab_income', monthlyIncome);
+                updateUI();
+            }
+        }
+
+        function getGPSLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    const lat = pos.coords.latitude.toFixed(3);
+                    const lng = pos.coords.longitude.toFixed(3);
+                    document.getElementById('location').value = `GPS (${lat}, ${lng})`;
+                }, () => {
+                    alert('लोकेशन अनुमति नहीं मिली। आप हाथ से लिख सकते हैं।');
+                });
+            } else {
+                alert('ब्राउज़र में GPS सपोर्ट नहीं है।');
+            }
+        }
+
+        function updateChart(categoryTotals) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            const labels = Object.keys(categoryTotals);
+            const data = Object.values(categoryTotals);
+
+            if (labels.length === 0) {
+                if (myChart) myChart.destroy();
+                return;
+            }
+
+            if (myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#f59e0b', '#10b981', '#6366f1', '#ec4899', '#8b5cf6', '#14b8a6', '#f43f5e'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { color: '#cbd5e1', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function shareOnWhatsApp() {
+            if (expenses.length === 0) {
+                alert('शेयर करने के लिए कोई हिसाब नहीं है!');
+                return;
+            }
+
+            let text = `*🪔 श्री लक्ष्मी हिसाब-किताब समरी*\n\n`;
+            text += `💰 *कुल आय:* ₹${monthlyIncome}\n`;
+            
+            let total = 0;
+            expenses.forEach(e => total += parseFloat(e.amount));
+            text += `💸 *कुल खर्च:* ₹${total}\n`;
+            text += `💵 *बचा हुआ बैलेंस:* ₹${monthlyIncome - total}\n\n`;
+            text += `*हाल के खर्चे:*\n`;
+
+            expenses.slice(-5).reverse().forEach(e => {
+                text += `• ${e.item} (${e.category}): ₹${e.amount} ${e.location ? '| 📍' + e.location : ''}\n`;
+            });
+
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        }
+
+        function exportJSONBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+                income: monthlyIncome,
+                expenses: expenses
+            }));
+            const downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", `hisab_backup_${new Date().toISOString().slice(0,10)}.json`);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+        }
+    </script>
 </body>
 </html>
-      
